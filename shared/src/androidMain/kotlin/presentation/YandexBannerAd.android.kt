@@ -11,7 +11,7 @@ import com.yandex.mobile.ads.common.AdRequest
 @Composable
 actual fun YandexBannerAd(adUnitId: String, modifier: Modifier) {
     AndroidView(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         factory = { context ->
             BannerAdView(context).apply {
                 setAdSize(BannerAdSize.sticky(context, 350))

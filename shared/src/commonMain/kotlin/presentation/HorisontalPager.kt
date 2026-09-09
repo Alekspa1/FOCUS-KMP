@@ -405,7 +405,7 @@ if (premium.value) {
 
         }
 
-        YandexBannerAd(CommonConst.BANER, Modifier.fillMaxWidth())
+        if(!premium.value)YandexBannerAd(CommonConst.BANER, Modifier.fillMaxWidth())
 
     }
 

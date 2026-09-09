@@ -1,8 +1,14 @@
 import CommonConst.DELETE_DIALOG_CATEGORY
+import CommonConst.FIRST_NAVIGATION_FAQ_SCREEN
+import CommonConst.FIRST_NAVIGATION_MAIN_SCREEN
+import CommonConst.FIRST_NAVIGATION_PREMIUM_SCREEN
+import CommonConst.FIRST_NAVIGATION_SETTINGS_SCREEN
 import CommonConst.INSERT_DIALOG_CATEGORY
 import CommonConst.INSERT_DIALOG_ITEM
 import CommonConst.PLATFORM_ANDROID
 import CommonConst.PREMIUM_CLICK
+import CommonConst.SECOND_NAVIGATION_PERSONAL_MAIN_PAGER
+import CommonConst.SECOND_NAVIGATION_SHARED_
 import CommonConst.SETTINGS_CLICK
 import CommonConst.SHARED_ClICK
 import CommonConst.SORT_SETTINGS
@@ -143,8 +149,11 @@ MaterialTheme(
         val categories by viewModel.categories.collectAsStateWithLifecycle()
         val updateState by viewModel.updateState.collectAsStateWithLifecycle()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-        var isCommonMode by remember { mutableStateOf(false) }
+
+       // var isCommonMode by remember { mutableStateOf(false) }
+        val route by viewModel.route.collectAsStateWithLifecycle()
         val category = viewModel.showDialog.category
+
         val snackbarHostState = remember { SnackbarHostState() }
         val productList by viewModel.productState.collectAsStateWithLifecycle()
 
@@ -234,11 +243,11 @@ MaterialTheme(
         
         NavHost( 
             navController = navController, 
-            startDestination = "main_screen"
+            startDestination = FIRST_NAVIGATION_MAIN_SCREEN
         ) {
             // ЭКРАН №1: Главный экран
             composable( 
-                route = "main_screen", 
+                route = FIRST_NAVIGATION_MAIN_SCREEN,
                 // Старый экран замирает на месте и не исчезает, пока новый заезжает поверх
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
                 popEnterTransition = { androidx.compose.animation.EnterTransition.None }
@@ -253,8 +262,8 @@ MaterialTheme(
 
                     Box(modifier = Modifier.fillMaxSize()){
                         StartAppContent(
-                            isCommonMode = isCommonMode,
-                            onToggleCommonMode = { isCommonMode = !isCommonMode },
+                            route = route,
+                            onToggleCommonMode = { route->  viewModel.writeSecondRounte(route) },
                             categories = categories,
                             toastEvents = {message -> viewModel.sendMessage(message) },
                             updateCategory = { category -> viewModel.updateCategory(category) },
@@ -266,13 +275,12 @@ MaterialTheme(
                             update = updateState,
                             onClick = { click ->
                                 when (click) {
-                                    PREMIUM_CLICK -> { navController.navigate("premium_screen") }
+                                    PREMIUM_CLICK -> { navController.navigate(FIRST_NAVIGATION_PREMIUM_SCREEN) }
                                     UPGRATE_CLICK -> {viewModel.openUpdateApp()}
-                                    SETTINGS_CLICK -> {
-                                        navController.navigate("settings_screen")
-
+                                    SETTINGS_CLICK -> { navController.navigate(FIRST_NAVIGATION_SETTINGS_SCREEN)}
+                                    SHARED_ClICK -> {
+                                        //viewModel.sendMessage("Общие дела появяться в следующих обновлениях")
                                     }
-                                    SHARED_ClICK -> { viewModel.sendMessage("Общие дела появяться в следующих обновлениях") }
                                 }
                             },
                             onClickCategory = { listCategory, action ->
@@ -298,7 +306,7 @@ MaterialTheme(
 
             // ЭКРАН №2: Настройки
             composable( 
-                route = "settings_screen",
+                route = FIRST_NAVIGATION_SETTINGS_SCREEN,
 
                 enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) },
                 popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
@@ -311,7 +319,7 @@ MaterialTheme(
                         size = viewModel.sizeState,
                         onBack = { navController.popBackStack()},
                         onClick = { click ->
-                            when (click) { "FAQ" -> navController.navigate("faq_screen") }
+                            when (click) { FIRST_NAVIGATION_FAQ_SCREEN -> navController.navigate(FIRST_NAVIGATION_FAQ_SCREEN) }
                         },
                         viewModel = viewModel,
                         innerPadding = innerPadding
@@ -320,7 +328,7 @@ MaterialTheme(
 
             // ЭКРАН №3: FAQ
             composable( 
-                route = "faq_screen", 
+                route = FIRST_NAVIGATION_FAQ_SCREEN,
                 enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) }, 
                 popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
@@ -336,7 +344,7 @@ MaterialTheme(
 
             // ЭКРАН №4: Премиум
             composable( 
-                route = "premium_screen", 
+                route = FIRST_NAVIGATION_PREMIUM_SCREEN,
                 enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) }, 
                 popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
                 exitTransition = { androidx.compose.animation.ExitTransition.None },
@@ -362,8 +370,10 @@ MaterialTheme(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun StartAppContent(
-    isCommonMode: Boolean = false,
-    onToggleCommonMode: () -> Unit = {},
+   // isCommonMode: Boolean = false,
+    route: String = SECOND_NAVIGATION_PERSONAL_MAIN_PAGER,
+   // onToggleCommonMode: () -> Unit = {},
+    onToggleCommonMode: (String) -> Unit = {},
     categories: List<ListCategory> = emptyList(),
     toastEvents: (String) -> Unit = {},
     updateCategory: (String) -> Unit = {},
@@ -428,9 +438,13 @@ fun StartAppContent(
                                 .padding(8.dp)
 
                         ) {
-                            // 1. ЗАГОЛОВОК ШТОРКИ (tvCategoryDrawer из XML)
+
                             Text(
-                                text = if (!isCommonMode) "Категории" else "Общие дела",
+                                text = when(route){
+                                    SECOND_NAVIGATION_PERSONAL_MAIN_PAGER -> "Категории"
+                                    SECOND_NAVIGATION_SHARED_ -> "Общие дела"
+                                    else -> "Категории"
+                                },
                                 color = theme.textColor,
                                 fontSize = size.textMenu,
                                 fontWeight = FontWeight.Bold,
@@ -440,7 +454,6 @@ fun StartAppContent(
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
                             )
 
-                            // 2. ДИНАМИЧЕСКИЙ СПИСОК (Заменяет RecyclerView и системные пункты)
                             LazyColumn(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -449,7 +462,7 @@ fun StartAppContent(
 
                                 ) {
                                 // Категория: Повседневные
-                                if (!isCommonMode) {
+                                if (route == SECOND_NAVIGATION_PERSONAL_MAIN_PAGER) {
                                     item {
                                         Row(
                                             modifier = Modifier
@@ -478,7 +491,6 @@ fun StartAppContent(
                                                     },
                                                 shape = RoundedCornerShape(10.dp),
                                                 colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
-                                                // colors = CardDefaults.cardColors(containerColor = cardSolidColor)
                                             ) {
                                                 Text(
                                                     modifier = Modifier.padding(8.dp),
@@ -489,15 +501,15 @@ fun StartAppContent(
                                                 )
                                             }
                                             IconButton(
-                                                onClick = { /* Логика меню */ },
+                                                onClick = { },
                                                 modifier = Modifier.size(35.dp)
                                             ) {
-                                                Icon(
-                                                    imageVector = theme.iconDrawerEveryday, // Или ваша иконка ic_menu
-                                                    contentDescription = "Меню",
-                                                    tint = theme.iconTint
-                                                )
-                                            }
+                                            Icon(
+                                                imageVector = theme.iconDrawerEveryday, // Или ваша иконка ic_menu
+                                                contentDescription = "Меню",
+                                                tint = theme.iconTint
+                                            )
+                                        }
                                         }
                                     }
                                 }
@@ -512,10 +524,6 @@ fun StartAppContent(
                                         Card(
                                             modifier = Modifier
                                                 .weight(1f)
-                                                // .clip(RoundedCornerShape(10.dp)) // corners android:radius="10dp"
-                                                // // 1. Задаем фоновый цвет карточки
-                                                // .background(theme.cardMenuItem)
-                                                // // 2. Рисуем рамку толщиной 3dp
                                                 .border(
                                                     3.dp,
                                                     theme.borderCardMenuItem,
@@ -523,7 +531,17 @@ fun StartAppContent(
                                                 )
                                                 // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
                                                 .clickable {
-                                                    onClick(SHARED_ClICK)
+                                                    val routeNow = when(route){
+                                                        SECOND_NAVIGATION_PERSONAL_MAIN_PAGER -> SECOND_NAVIGATION_SHARED_
+                                                        SECOND_NAVIGATION_SHARED_ -> SECOND_NAVIGATION_PERSONAL_MAIN_PAGER
+                                                        else -> ""
+                                                    }
+                                                    localNavController.navigate(routeNow){
+                                                        popUpTo(routeNow) { inclusive = true }
+                                                        launchSingleTop = true
+                                                    }
+                                                    //onClick(SHARED_ClICK)
+                                                    onToggleCommonMode(routeNow)
 //                                                    onToggleCommonMode()
 //
 //                                                    // 2. Рассчитываем роуты на основе инвертированного значения (так как стейт обновится на следующем кадре)
@@ -545,7 +563,11 @@ fun StartAppContent(
                                         ) {
                                             Text(
                                                 modifier = Modifier.padding(8.dp),
-                                                text = if (isCommonMode) "Личные дела" else "Общие дела",
+                                                text = when(route){
+                                                    SECOND_NAVIGATION_PERSONAL_MAIN_PAGER -> "Общие дела"
+                                                    SECOND_NAVIGATION_SHARED_ -> "Личные дела"
+                                                    else -> ""
+                                                },
                                                 color = theme.textColor,
                                                 lineHeight = size.lineHeightItem,
                                                 fontSize = size.textItem
@@ -556,89 +578,92 @@ fun StartAppContent(
                                             modifier = Modifier.size(35.dp)
                                         ) {
                                             Icon(
-                                                imageVector = if (isCommonMode) theme.iconDrawerEveryday
-                                                else theme.iconDrawerShare, // Замените на иконку Share, если добавлена в тему
+                                                imageVector =
+                                                    when(route){
+                                                        SECOND_NAVIGATION_PERSONAL_MAIN_PAGER -> theme.iconDrawerShare
+                                                        SECOND_NAVIGATION_SHARED_ -> theme.iconDrawerEveryday
+                                                        else -> theme.iconDrawerEveryday
+                                                    },
                                                 contentDescription = "Поделиться",
                                                 tint = theme.iconTint
                                             )
                                         }
                                     }
                                 }
-
-                                if (!isCommonMode) {
-                                    items(
-                                        items = categories,
-                                        key = { it.id!! }
-                                    ) { category ->
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Card(
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    // .clip(RoundedCornerShape(10.dp)) // corners android:radius="10dp"
-                                                    // // 1. Задаем фоновый цвет карточки
-                                                    // .background(theme.cardMenuItem)
-                                                    // 2. Рисуем рамку толщиной 3dp
-                                                    .border(
-                                                        3.dp,
-                                                        theme.borderCardMenuItem,
-                                                        RoundedCornerShape(10.dp)
-                                                    )
-                                                    // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
-                                                    .combinedClickable(
-                                                        onClick = {
-                                                            scope.launch {
-                                                                launch { drawerState.close() }
-                                                                launch {
-                                                                    pagerState.animateScrollToPage(
-                                                                        1
+                                    when(route){
+                                        SECOND_NAVIGATION_PERSONAL_MAIN_PAGER->{
+                                            items(
+                                                items = categories,
+                                                key = { it.id!! }
+                                            ) { category ->
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Card(
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .border(
+                                                                3.dp,
+                                                                theme.borderCardMenuItem,
+                                                                RoundedCornerShape(10.dp)
+                                                            )
+                                                            // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
+                                                            .combinedClickable(
+                                                                onClick = {
+                                                                    scope.launch {
+                                                                        launch { drawerState.close() }
+                                                                        launch {
+                                                                            pagerState.animateScrollToPage(
+                                                                                1
+                                                                            )
+                                                                        }
+                                                                    }
+                                                                    updateCategory(category.name)
+                                                                },
+                                                                onLongClick = {
+                                                                    onClickCategory(
+                                                                        category,
+                                                                        INSERT_DIALOG_CATEGORY
                                                                     )
                                                                 }
-                                                            }
-                                                            updateCategory(category.name)
-                                                        },
-                                                        onLongClick = {
+                                                            ),
+                                                        shape = RoundedCornerShape(10.dp),
+
+                                                        colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
+                                                    ) {
+                                                        Text(
+                                                            modifier = Modifier.padding(8.dp),
+                                                            text = category.name,
+                                                            color = theme.textColor,
+                                                            lineHeight = size.lineHeightItem,
+                                                            fontSize = size.textItem
+                                                        )
+                                                    }
+                                                    IconButton(
+                                                        onClick = {
                                                             onClickCategory(
                                                                 category,
-                                                                INSERT_DIALOG_CATEGORY
+                                                                DELETE_DIALOG_CATEGORY
                                                             )
-                                                        }
-                                                    ),
-                                                shape = RoundedCornerShape(10.dp),
-                                               
-                                                colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
-                                            ) {
-                                                Text(
-                                                    modifier = Modifier.padding(8.dp),
-                                                    text = category.name,
-                                                    color = theme.textColor,
-                                                    lineHeight = size.lineHeightItem,
-                                                    fontSize = size.textItem
-                                                )
-                                            }
-                                            IconButton(
-                                                onClick = {
-                                                    onClickCategory(
-                                                        category,
-                                                        DELETE_DIALOG_CATEGORY
-                                                    )
-                                                },
-                                                modifier = Modifier.size(35.dp)
-                                            ) {
-                                                Icon(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                   // imageVector = ThemeNeon().iconDelItem,
-                                                    imageVector = theme.iconDelItem,
-                                                    contentDescription = "Удалить",
-                                                    tint = theme.iconDelTint
-                                                )
+                                                        },
+                                                        modifier = Modifier.size(35.dp)
+                                                    ) {
+                                                        Icon(
+                                                            modifier = Modifier.fillMaxSize(),
+                                                            imageVector = theme.iconDelItem,
+                                                            contentDescription = "Удалить",
+                                                            tint = theme.iconDelTint
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
+                                        SECOND_NAVIGATION_SHARED_ ->{
+                                            item { Text("Временный элемент") }
+                                        }
                                     }
-                                } else item { Text("Временный элемент") }
                             }
 
 
@@ -776,17 +801,17 @@ fun StartAppContent(
 
                 NavHost(
                     navController = localNavController,
-                    startDestination = "personal_pager_hub",
+                    startDestination = SECOND_NAVIGATION_PERSONAL_MAIN_PAGER,
 
                     ) {
 
                     // Точка А: Твой текущий пейджер (Блокнот + Будильник)
-                    composable("personal_pager_hub") {
+                    composable(SECOND_NAVIGATION_PERSONAL_MAIN_PAGER) {
                         openPager(onOpenDrawer, pagerState)
                     }
 
                     // Точка Б: Новый экран Общих Дел
-                    composable("common_screen") {
+                    composable(SECOND_NAVIGATION_SHARED_) {
                         // Сюда мы подставим твой будущий экран общих дел
                         // CommonTasksScreen(innerPadding = innerPadding, viewModel = viewModel)
                     }

@@ -12,4 +12,8 @@ class DesktopGetPlatformImpl : GetPlatrormRepository {
     override fun updateApp(result: (Boolean) -> Unit) {
         result(false)
     }
+
+    override fun openUpdateApp(errorMessage: (String) -> Unit) {
+
+    }
 }

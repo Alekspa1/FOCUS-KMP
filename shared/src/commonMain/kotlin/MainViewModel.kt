@@ -7,6 +7,7 @@ import CommonConst.BATTERY_OPTIMIZATION
 import CommonConst.DEFAULT_DIALOG
 import CommonConst.INSERT_DIALOG_ITEM
 import CommonConst.NOTIFICATION
+import CommonConst.SECOND_NAVIGATION_PERSONAL_MAIN_PAGER
 import CommonConst.SIZE_LARGE
 import CommonConst.SIZE_SMALL
 import CommonConst.SIZE_STANDART
@@ -108,6 +109,9 @@ class MainViewModel(
 
     var firstStart by mutableStateOf(true)
 
+    private val _route = MutableStateFlow(SECOND_NAVIGATION_PERSONAL_MAIN_PAGER)
+    val route = _route.asStateFlow()
+
     private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
 
@@ -129,6 +133,10 @@ class MainViewModel(
         loadProduct()
         isCheckPremiumWithBuy()
 
+    }
+
+    fun writeSecondRounte(route: String){
+        _route.value = route
     }
 
 private val _sharedIntentEvent = Channel<Pair<String?, String?>>(Channel.BUFFERED)
