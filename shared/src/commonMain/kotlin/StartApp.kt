@@ -537,14 +537,14 @@ fun StartAppContent(
                                                         else -> ""
                                                     }
 localNavController.navigate(routeNow) {
-    // Очищаем стек до самого первого экрана графа, чтобы не копить историю
-    popUpTo(localNavController.graph.startDestinationId) {
-        saveState = true // Сохраняем состояние экрана, с которого уходим
+    // ВМЕСТО startDestinationId пишем popUpTo(route)
+    // route — это экран, на котором пользователь находится ПРЯМО СЕЙЧАС.
+    // inclusive = true полностью уничтожит текущий экран в момент перехода.
+    popUpTo(route) { 
+        inclusive = true 
     }
-    // Избегаем дублирования экрана, если на него нажали дважды
+    // Не дает создавать дубликаты экрана
     launchSingleTop = true
-    // Восстанавливаем состояние экрана, на который переходим
-    restoreState = true
 }
 
  
