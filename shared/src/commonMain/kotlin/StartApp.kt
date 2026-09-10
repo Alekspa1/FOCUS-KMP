@@ -536,13 +536,15 @@ fun StartAppContent(
                                                         SECOND_NAVIGATION_SHARED_ -> SECOND_NAVIGATION_PERSONAL_MAIN_PAGER
                                                         else -> ""
                                                     }
-                                                    localNavController.navigate(routeNow) {
-    // Всплываем (очищаем стек) до самого первого экрана в графе (startDestination)
-    // inclusive = true ОЗНАЧАЕТ: удалить даже этот стартовый экран
-    popUpTo(localNavController.graph.startDestinationId) { 
+
+localNavController.navigate(routeNow) {
+    // ВМЕСТО startDestinationId пишем popUpTo(route)
+    // route — это экран, на котором пользователь находится ПРЯМО СЕЙЧАС.
+    // inclusive = true полностью уничтожит текущий экран в момент перехода.
+    popUpTo(route) { 
         inclusive = true 
     }
-    // Не дает создать копию экрана, если мы уже на нем находимся
+    // Не дает создавать дубликаты экрана
     launchSingleTop = true
 }
  
