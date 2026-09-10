@@ -537,9 +537,16 @@ fun StartAppContent(
                                                         else -> ""
                                                     }
                                                     localNavController.navigate(routeNow) {
-                                                     popUpTo(localNavController.graph.startDestinationId) { inclusive = false }
-                                                      launchSingleTop = true
-                                                     }
+    // Всплываем (очищаем стек) до самого первого экрана в графе (startDestination)
+    // inclusive = true ОЗНАЧАЕТ: удалить даже этот стартовый экран
+    popUpTo(localNavController.graph.startDestinationId) { 
+        inclusive = true 
+    }
+    // Не дает создать копию экрана, если мы уже на нем находимся
+    launchSingleTop = true
+}
+ 
+                                                     
 
                                               //      localNavController.navigate(routeNow){
                                                  //       popUpTo(routeNow) { inclusive = true }
