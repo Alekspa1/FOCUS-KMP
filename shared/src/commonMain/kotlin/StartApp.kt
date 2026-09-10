@@ -536,10 +536,15 @@ fun StartAppContent(
                                                         SECOND_NAVIGATION_SHARED_ -> SECOND_NAVIGATION_PERSONAL_MAIN_PAGER
                                                         else -> ""
                                                     }
-                                                    localNavController.navigate(routeNow){
-                                                        popUpTo(routeNow) { inclusive = true }
-                                                        launchSingleTop = true
-                                                    }
+                                                    localNavController.navigate(routeNow) {
+                                                     popUpTo(localNavController.graph.startDestinationId) { inclusive = false }
+                                                      launchSingleTop = true
+                                                     }
+
+                                              //      localNavController.navigate(routeNow){
+                                                 //       popUpTo(routeNow) { inclusive = true }
+                                                   //     launchSingleTop = true
+                                                   // }
                                                     //onClick(SHARED_ClICK)
                                                     onToggleCommonMode(routeNow)
 //                                                    onToggleCommonMode()
