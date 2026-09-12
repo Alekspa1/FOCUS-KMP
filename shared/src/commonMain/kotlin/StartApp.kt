@@ -262,8 +262,8 @@ MaterialTheme(
 
                     Box(modifier = Modifier.fillMaxSize()){
                         StartAppContent(
-                            route = route,
-                            onToggleCommonMode = { route->  viewModel.writeSecondRounte(route) },
+                            isPersonalRoute = route,
+                            onPersonalModel = { route->  viewModel.writeSecondRounte(route) },
                             categories = categories,
                             toastEvents = {message -> viewModel.sendMessage(message) },
                             updateCategory = { category -> viewModel.updateCategory(category) },
@@ -370,10 +370,8 @@ MaterialTheme(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun StartAppContent(
-   // isCommonMode: Boolean = false,
-    route: String = SECOND_NAVIGATION_PERSONAL_MAIN_PAGER,
-   // onToggleCommonMode: () -> Unit = {},
-    onToggleCommonMode: (String) -> Unit = {},
+    isPersonalRoute: Boolean = false,
+    onPersonalModel: (Boolean) -> Unit = {},
     categories: List<ListCategory> = emptyList(),
     toastEvents: (String) -> Unit = {},
     updateCategory: (String) -> Unit = {},
@@ -440,11 +438,8 @@ fun StartAppContent(
                         ) {
 
                             Text(
-                                text = when(route){
-                                    SECOND_NAVIGATION_PERSONAL_MAIN_PAGER -> "Категории"
-                                    SECOND_NAVIGATION_SHARED_ -> "Общие дела"
-                                    else -> "Категории"
-                                },
+                                text = if(isPersonalRoute) "Категории" else "Общие дела"
+                                ,
                                 color = theme.textColor,
                                 fontSize = size.textMenu,
                                 fontWeight = FontWeight.Bold,
@@ -462,7 +457,7 @@ fun StartAppContent(
 
                                 ) {
                                 // Категория: Повседневные
-                                if (route == SECOND_NAVIGATION_PERSONAL_MAIN_PAGER) {
+                                if (isPersonalRoute) {
                                     item {
                                         Row(
                                             modifier = Modifier
@@ -529,33 +524,16 @@ fun StartAppContent(
                                                     theme.borderCardMenuItem,
                                                     RoundedCornerShape(10.dp)
                                                 )
-                                                // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
+
                                                 .clickable {
-                                                    val routeNow = when(route){
-                                                        SECOND_NAVIGATION_PERSONAL_MAIN_PAGER -> SECOND_NAVIGATION_SHARED_
-                                                        SECOND_NAVIGATION_SHARED_ -> SECOND_NAVIGATION_PERSONAL_MAIN_PAGER
-                                                        else -> ""
-                                                    }
-                                                    localNavController.navigate(routeNow){
-                                                        popUpTo(routeNow) { inclusive = true }
+                                                    val nextRoute = if (isPersonalRoute) SECOND_NAVIGATION_SHARED_ else SECOND_NAVIGATION_PERSONAL_MAIN_PAGER
+                                                    val popUpRoute = if(isPersonalRoute) SECOND_NAVIGATION_PERSONAL_MAIN_PAGER else SECOND_NAVIGATION_SHARED_
+                                                    localNavController.navigate(nextRoute){
+                                                        popUpTo(popUpRoute) { inclusive = true }
                                                         launchSingleTop = true
                                                     }
                                                     //onClick(SHARED_ClICK)
-                                                    onToggleCommonMode(routeNow)
-//                                                    onToggleCommonMode()
-//
-//                                                    // 2. Рассчитываем роуты на основе инвертированного значения (так как стейт обновится на следующем кадре)
-//                                                    val nextMode = !isCommonMode
-//                                                    val targetRoute =
-//                                                        if (nextMode) "common_screen" else "personal_pager_hub"
-//                                                    val popUpRoute =
-//                                                        if (nextMode) "personal_pager_hub" else "common_screen"
-//
-//                                                    localNavController.navigate(targetRoute) {
-//                                                        popUpTo(popUpRoute) { inclusive = true }
-//                                                        launchSingleTop = true
-//                                                    }
-
+                                                    onPersonalModel(!isPersonalRoute)
                                                 },
                                             shape = RoundedCornerShape(10.dp),
                                             
@@ -563,11 +541,7 @@ fun StartAppContent(
                                         ) {
                                             Text(
                                                 modifier = Modifier.padding(8.dp),
-                                                text = when(route){
-                                                    SECOND_NAVIGATION_PERSONAL_MAIN_PAGER -> "Общие дела"
-                                                    SECOND_NAVIGATION_SHARED_ -> "Личные дела"
-                                                    else -> ""
-                                                },
+                                                text = if(isPersonalRoute) "Общие дела" else "Личные дела",
                                                 color = theme.textColor,
                                                 lineHeight = size.lineHeightItem,
                                                 fontSize = size.textItem
@@ -578,92 +552,87 @@ fun StartAppContent(
                                             modifier = Modifier.size(35.dp)
                                         ) {
                                             Icon(
-                                                imageVector =
-                                                    when(route){
-                                                        SECOND_NAVIGATION_PERSONAL_MAIN_PAGER -> theme.iconDrawerShare
-                                                        SECOND_NAVIGATION_SHARED_ -> theme.iconDrawerEveryday
-                                                        else -> theme.iconDrawerEveryday
-                                                    },
+                                                imageVector = if(isPersonalRoute) theme.iconDrawerShare else theme.iconDrawerEveryday,
                                                 contentDescription = "Поделиться",
                                                 tint = theme.iconTint
                                             )
                                         }
                                     }
                                 }
-                                    when(route){
-                                        SECOND_NAVIGATION_PERSONAL_MAIN_PAGER->{
-                                            items(
-                                                items = categories,
-                                                key = { it.id!! }
-                                            ) { category ->
-                                                Row(
+                                    if(isPersonalRoute)
+                                    {
+                                        items(
+                                            items = categories,
+                                            key = { it.id!! }
+                                        ) { category ->
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth(),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Card(
                                                     modifier = Modifier
-                                                        .fillMaxWidth(),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Card(
-                                                        modifier = Modifier
-                                                            .weight(1f)
-                                                            .border(
-                                                                3.dp,
-                                                                theme.borderCardMenuItem,
-                                                                RoundedCornerShape(10.dp)
-                                                            )
-                                                            // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
-                                                            .combinedClickable(
-                                                                onClick = {
-                                                                    scope.launch {
-                                                                        launch { drawerState.close() }
-                                                                        launch {
-                                                                            pagerState.animateScrollToPage(
-                                                                                1
-                                                                            )
-                                                                        }
+                                                        .weight(1f)
+                                                        .border(
+                                                            3.dp,
+                                                            theme.borderCardMenuItem,
+                                                            RoundedCornerShape(10.dp)
+                                                        )
+                                                        // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
+                                                        .combinedClickable(
+                                                            onClick = {
+                                                                scope.launch {
+                                                                    launch { drawerState.close() }
+                                                                    launch {
+                                                                        pagerState.animateScrollToPage(
+                                                                            1
+                                                                        )
                                                                     }
-                                                                    updateCategory(category.name)
-                                                                },
-                                                                onLongClick = {
-                                                                    onClickCategory(
-                                                                        category,
-                                                                        INSERT_DIALOG_CATEGORY
-                                                                    )
                                                                 }
-                                                            ),
-                                                        shape = RoundedCornerShape(10.dp),
+                                                                updateCategory(category.name)
+                                                            },
+                                                            onLongClick = {
+                                                                onClickCategory(
+                                                                    category,
+                                                                    INSERT_DIALOG_CATEGORY
+                                                                )
+                                                            }
+                                                        ),
+                                                    shape = RoundedCornerShape(10.dp),
 
-                                                        colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
-                                                    ) {
-                                                        Text(
-                                                            modifier = Modifier.padding(8.dp),
-                                                            text = category.name,
-                                                            color = theme.textColor,
-                                                            lineHeight = size.lineHeightItem,
-                                                            fontSize = size.textItem
+                                                    colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
+                                                ) {
+                                                    Text(
+                                                        modifier = Modifier.padding(8.dp),
+                                                        text = category.name,
+                                                        color = theme.textColor,
+                                                        lineHeight = size.lineHeightItem,
+                                                        fontSize = size.textItem
+                                                    )
+                                                }
+                                                IconButton(
+                                                    onClick = {
+                                                        onClickCategory(
+                                                            category,
+                                                            DELETE_DIALOG_CATEGORY
                                                         )
-                                                    }
-                                                    IconButton(
-                                                        onClick = {
-                                                            onClickCategory(
-                                                                category,
-                                                                DELETE_DIALOG_CATEGORY
-                                                            )
-                                                        },
-                                                        modifier = Modifier.size(35.dp)
-                                                    ) {
-                                                        Icon(
-                                                            modifier = Modifier.fillMaxSize(),
-                                                            imageVector = theme.iconDelItem,
-                                                            contentDescription = "Удалить",
-                                                            tint = theme.iconDelTint
-                                                        )
-                                                    }
+                                                    },
+                                                    modifier = Modifier.size(35.dp)
+                                                ) {
+                                                    Icon(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        imageVector = theme.iconDelItem,
+                                                        contentDescription = "Удалить",
+                                                        tint = theme.iconDelTint
+                                                    )
                                                 }
                                             }
                                         }
-                                        SECOND_NAVIGATION_SHARED_ ->{
-                                            item { Text("Временный элемент") }
-                                        }
                                     }
+                                else {
+                                        item { Text("Временный элемент") }
+                                    }
+
                             }
 
 
@@ -801,7 +770,7 @@ fun StartAppContent(
 
                 NavHost(
                     navController = localNavController,
-                    startDestination = SECOND_NAVIGATION_PERSONAL_MAIN_PAGER,
+                    startDestination = if(isPersonalRoute)SECOND_NAVIGATION_PERSONAL_MAIN_PAGER else SECOND_NAVIGATION_SHARED_,
 
                     ) {
 
@@ -812,7 +781,6 @@ fun StartAppContent(
 
                     // Точка Б: Новый экран Общих Дел
                     composable(SECOND_NAVIGATION_SHARED_) {
-                        // Сюда мы подставим твой будущий экран общих дел
                         // CommonTasksScreen(innerPadding = innerPadding, viewModel = viewModel)
                     }
                 }

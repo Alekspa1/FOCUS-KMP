@@ -141,11 +141,11 @@ data class ThemeZabor (
     // Контуры карточек (делаем их помягче для светлой темы)
     override val cardItemBorderAlarm: Color = Color(0x7FFFEB3B),
     override val cardItemBorderTrue: Color = Color(0x6623BD00),
-    override val cardItemBorderFalse: Color = Color(0xB3FB4141),
+    override val cardItemBorderFalse: Color = Color(0x6623BD00),
 
     // Фоны карточек делаем ПАСТЕЛЬНЫМИ (разбеленными). Тёмный текст на них будет выглядеть супер
-    override val cardItemAlarm: Color = Color(0xB3D6C000), // Мягкий светло-желтый
-    override val cardItemTrue: Color = Color(0xFF6623BD00),  // Нежно-салатовый
+    override val cardItemAlarm: Color = Color(0x80F30404), // Мягкий светло-желтый
+    override val cardItemTrue: Color = Color(0x6623BD00),  // Нежно-салатовый
     override val cardItemFalse: Color = Color(0x80F30404), // Приглушенно-розовый
 
     override val textAlarm: Color = Color.Yellow,     // Темно-оранжевый для цифр времени
@@ -197,7 +197,7 @@ data class ThemeStorm(
     override val cardItemBorderFalse: Color = Color(0x99D50000),
 
     override val cardItemAlarm: Color = Color(0xEC1A1A28),      // Тёмно‑фиолетовый фон карточки с тревожным оттенком
-    override val cardItemTrue: Color = Color(0xEC09140E),
+    override val cardItemTrue: Color = Color(0xE1014E29),
     override val cardItemFalse: Color = Color(0xF23D0101),
 
     override val textAlarm: Color = Color(0xFFFFD700),          // Золотой для времени — как вспышка перед разрядом (альтернатива: оставить белым)
@@ -302,7 +302,7 @@ data class ThemeMarble (
      override val cardItemBorderFalse: Color = Color(0x99D50000),
 
      override val cardItemAlarm: Color = Color(0xEC09140E),
-     override val cardItemTrue: Color = Color(0xEC09140E),
+     override val cardItemTrue: Color = Color(0xE1014E29),
      override val cardItemFalse: Color = Color(0xF23D0101),
 
      override val textAlarm: Color = Color(0xFF00FF87),           // Светящийся зеленый текст времени
@@ -354,8 +354,8 @@ data class ThemeMarble (
      override val cardItemBorderFalse: Color = Color(0xFFFF1744), // Чистый красный бордюр
 
      override val cardItemAlarm: Color = Color(0xDA0B0A0D),       // Глубокий угольный
-     override val cardItemFalse: Color = Color(0xDA1A0B0B),
-     override val cardItemTrue: Color = Color(0xE1014E29),
+     override val cardItemFalse: Color = Color(0xFF3D0101),
+     override val cardItemTrue: Color = Color(0xFF014E29),
 
 
      override val textAlarm: Color = Color(0xFFFF6D00),           // Огненный текст времени

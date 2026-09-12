@@ -109,8 +109,8 @@ class MainViewModel(
 
     var firstStart by mutableStateOf(true)
 
-    private val _route = MutableStateFlow(SECOND_NAVIGATION_PERSONAL_MAIN_PAGER)
-    val route = _route.asStateFlow()
+    private val _isPersonalToDoRoute = MutableStateFlow(true)
+    val route = _isPersonalToDoRoute.asStateFlow()
 
     private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
@@ -135,8 +135,8 @@ class MainViewModel(
 
     }
 
-    fun writeSecondRounte(route: String){
-        _route.value = route
+    fun writeSecondRounte(isPersonal: Boolean){
+        _isPersonalToDoRoute.value = isPersonal
     }
 
 private val _sharedIntentEvent = Channel<Pair<String?, String?>>(Channel.BUFFERED)
@@ -153,18 +153,12 @@ fun openDialogWithSharedData(text: String?, imageUri: String?) {
 
 fun openDialogByTaskId(taskId: Int) {
     viewModelScope.launch {
-        // 1. Берем задачу из базы (у тебя это CourseDao через db)
-        // Если у тебя в DAO есть метод getById, используем его
         val task = db.getItemFromId(taskId) // Реализуй этот метод в Room, если его нет
-        
-        if (task != null) {
-            // 2. Просто выставляем стейт диалога напрямую (так как вьюмодель общая)
             showDialog = DialogState(
                 isWho = INSERT_DIALOG_ITEM,
                 item = task,
-                calendar = false // или true, если задача из календаря
             )
-        }
+
     }
 }
 
@@ -202,7 +196,7 @@ fun openDialogByTaskId(taskId: Int) {
                     sendMessage("Восстановление прошло успешно!")
                     stateTextNotebook = pref.loadTextNoteBook()
                 } else {
-                    sendMessage("Не удалось прочитать или записать файл бэкапа.")
+                    sendMessage("Не удалось прочитать файл бэкапа.")
                 }
             }
 

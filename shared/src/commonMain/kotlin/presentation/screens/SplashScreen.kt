@@ -57,7 +57,7 @@ fun SplashScreen(onAnimationDone: () -> Unit) {
 
         // 2. Ждем, пока WarmupActivity сделает свою работу в onStop (600 мс)
         // В это время логотип продолжает красиво и плавно пульсировать!
-        delay(300)
+        //delay(300)
 
         // 3. ПЛАВНОЕ ЗАТУХАНИЕ: уводим прозрачность всего экрана в 0 за 400 мс
         splashAlpha.animateTo(0f, tween(750, easing = FastOutLinearInEasing))

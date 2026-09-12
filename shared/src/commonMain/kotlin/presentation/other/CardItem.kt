@@ -112,18 +112,23 @@ fun CardItem(
     var isExpanded by remember { mutableStateOf(false) }
     var currentSnapshotList by remember { mutableStateOf(listSubItems) }
 
-    val cardShape =  if (isExpanded && (currentSnapshotList.isNotEmpty() || selectedFileUri.isNotEmpty())) {
-                RoundedCornerShape(topStart = 15.dp, topEnd = 15.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
-            } else {
-                RoundedCornerShape(15.dp)
-            }
+    val cardShape =
+        if (isExpanded && (currentSnapshotList.isNotEmpty() || selectedFileUri.isNotEmpty())) {
+            RoundedCornerShape(
+                topStart = 15.dp,
+                topEnd = 15.dp,
+                bottomStart = 0.dp,
+                bottomEnd = 0.dp
+            )
+        } else {
+            RoundedCornerShape(15.dp)
+        }
 
     val menuCardShape = if (isExpanded) {
-                RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
-            } else {
-                RoundedCornerShape(15.dp)
-            }
-
+        RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
+    } else {
+        RoundedCornerShape(15.dp)
+    }
 
 
     val listState = rememberLazyListState()
@@ -235,37 +240,33 @@ fun CardItem(
                             .weight(1f)
                             .padding(start = 6.dp, end = 6.dp),
                     ) {
+                        Text(
+                            text = item.name,
+                            color = theme.textColor,
+                            lineHeight = size.lineHeightItem,
+                            fontSize = size.textItem
+                        )
+
+                        if (item.desc.isNotEmpty()) {
                             Text(
-                                text = item.name,
-                                color = theme.textColor,
-                                lineHeight = size.lineHeightItem,
-                                fontSize = size.textItem
+                                modifier = Modifier.padding(top = 2.dp),
+                                text = item.desc,
+                                color = theme.textDesc,
+                                lineHeight = size.lineHeightDescAndAlarm,
+                                fontSize = size.textDesc
                             )
-
-                            if (item.desc.isNotEmpty()) {
-                                Text(
-                                    modifier = Modifier.padding(top = 2.dp),
-                                    text = item.desc,
-                                    color = theme.textDesc,
-                                    lineHeight = size.lineHeightDescAndAlarm,
-                                    fontSize = size.textDesc
-                                )
-                            }
+                        }
 
 
-                            if (item.changeAlarm) {
-                                Text(
-                                    modifier = Modifier.padding(top = 4.dp),
-                                    text = alarmText(item),
-                                    color = theme.textAlarm,
-                                    fontSize = size.textAlarm,
-                                    lineHeight = size.lineHeightDescAndAlarm
-                                )
-                            }
-
-
-
-
+                        if (item.changeAlarm) {
+                            Text(
+                                modifier = Modifier.padding(top = 4.dp),
+                                text = alarmText(item),
+                                color = theme.textAlarm,
+                                fontSize = size.textAlarm,
+                                lineHeight = size.lineHeightDescAndAlarm
+                            )
+                        }
 
 
                     }
@@ -275,8 +276,9 @@ fun CardItem(
                         onCheckedChange = { onClick(item, CHANGE) },
                         modifier = Modifier.padding(end = 4.dp).size(24.dp),
                         colors = CheckboxDefaults.colors(
-                            checkedColor = theme.chekBoxTint,
-                            uncheckedColor = theme.chekBoxTint
+                            checkedColor = theme.cardItemBorderTrue,
+                            uncheckedColor = theme.chekBoxTint,
+                            checkmarkColor = theme.chekBoxTint
                         )
                     )
                 }
@@ -327,8 +329,7 @@ fun CardItem(
                 ) {
 
 
-
-                    if(selectedFileUri.isNotEmpty()){
+                    if (selectedFileUri.isNotEmpty()) {
                         HorizontalDivider(
                             thickness = 1.dp,
                             color = theme.textColor.copy(alpha = 0.15f),
@@ -341,12 +342,12 @@ fun CardItem(
                                 .fillMaxWidth()
                                 .height(120.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .clickable {onClick(item, IMAGE)  },
+                                .clickable { onClick(item, IMAGE) },
                             contentScale = ContentScale.Crop,
                         )
 
                     }
-                    if(currentSnapshotList.isNotEmpty()) {
+                    if (currentSnapshotList.isNotEmpty()) {
                         HorizontalDivider(
                             thickness = 1.dp,
                             color = theme.textColor.copy(alpha = 0.15f),
@@ -438,7 +439,7 @@ fun CardItem(
 
                                         // ИКОНКА УДАЛЕНИЯ ПОДЗАДАЧИ
                                         IconButton(
-                                            onClick = {onClickSubItem(subItem, DELETE) },
+                                            onClick = { onClickSubItem(subItem, DELETE) },
                                             modifier = Modifier.size(24.dp)
                                         ) {
                                             Icon(
@@ -635,26 +636,26 @@ fun Modifier.borderThreeSidesRounded(
 
 @Preview
 @Composable
-fun PrevCardNeon(){
-    CardItem(item = Item(name = "Test",), theme = ThemeNeon())
+fun PrevCardNeon() {
+    CardItem(item = Item(name = "Test"), theme = ThemeNeon())
 }
 
 @Preview
 @Composable
-fun PrevCardZabor(){
-    CardItem(item = Item(name = "Test",), theme = ThemeZabor())
+fun PrevCardZabor() {
+    CardItem(item = Item(name = "Test"), theme = ThemeZabor())
 }
 
 @Preview
 @Composable
-fun PrevCardVolcanic(){
-    CardItem(item = Item(name = "Test",), theme = ThemeVolcanic())
+fun PrevCardVolcanic() {
+    CardItem(item = Item(name = "Test"), theme = ThemeVolcanic())
 }
 
 @Preview
 @Composable
-fun PrevCardPoison(){
-    Box(){
+fun PrevCardPoison() {
+    Box() {
         Image(
             painter = painterResource(ThemePoison().backgroundStart),
             contentDescription = null,

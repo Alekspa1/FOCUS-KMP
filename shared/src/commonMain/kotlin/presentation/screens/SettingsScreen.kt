@@ -4,6 +4,7 @@ import CommonConst.ALARM_SETTINGS
 import CommonConst.APP_SETTINGS
 import CommonConst.BATTERY_OPTIMIZATION
 import CommonConst.DONATE
+import CommonConst.FIRST_NAVIGATION_FAQ_SCREEN
 import CommonConst.PLATFORM_ANDROID
 import CommonConst.SIZE_LARGE
 import CommonConst.SIZE_SETTINGS
@@ -268,7 +269,7 @@ fun SettingsScreen(
                         size,
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
-                    ) { onClick("FAQ") }
+                    ) { onClick(FIRST_NAVIGATION_FAQ_SCREEN) }
                     SettingItem(
                         "Обратная связь",
                         theme,
