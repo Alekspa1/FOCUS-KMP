@@ -96,8 +96,8 @@ data class ThemeNeon (
 
     override val textAlarm: Color = Color.Yellow,
     override val chekBoxOff: Color = Color.White,
-    override val chekBoxOn: Color = cardItemBorderTrue,
-    override val chekBoxTint: Color = Color.White,
+    override val chekBoxOn: Color = Color.White,
+    override val chekBoxTint: Color = Color.Black,
 
     override val iconImage: ImageVector = Icons.Default.Image,
     override val iconAdd: ImageVector = Icons.Default.AddCircleOutline,
@@ -155,7 +155,7 @@ data class ThemeZabor (
     override val textAlarm: Color = Color.Yellow,     // Темно-оранжевый для цифр времени
     override val chekBoxOff: Color =  Color.Black,
     override val chekBoxOn: Color = Color.Black,
-    override val chekBoxTint: Color = Color.White,   // Шоколадный цвет для чекбокса
+    override val chekBoxTint: Color = Color.White,     // Шоколадный цвет для чекбокса
 
     override val iconImage: ImageVector = Icons.Default.Image,
     override val iconAdd: ImageVector = Icons.Default.AddCircleOutline,
@@ -207,8 +207,8 @@ data class ThemeStorm(
 
     override val textAlarm: Color = Color(0xFFFFD700),          // Золотой для времени — как вспышка перед разрядом (альтернатива: оставить белым)
     override val chekBoxOff: Color = Color.White,
-    override val chekBoxOn: Color = cardItemBorderTrue,
-    override val chekBoxTint: Color = Color.White,      // Фиолетовые чекбоксы
+    override val chekBoxOn: Color = Color.White,
+    override val chekBoxTint: Color = Color.Black,     // Фиолетовые чекбоксы
 
     override val iconImage: ImageVector = Icons.Default.Image,
     override val iconAdd: ImageVector = Icons.Default.AddCircleOutline,
@@ -314,8 +314,8 @@ data class ThemeMarble (
 
      override val textAlarm: Color = Color(0xFF00FF87),           // Светящийся зеленый текст времени
      override val chekBoxOff: Color = Color.White,
-     override val chekBoxOn: Color = cardItemBorderTrue,
-     override val chekBoxTint: Color = Color.White,        // Яркий токсичный чекбокс
+     override val chekBoxOn: Color = Color.White,
+     override val chekBoxTint: Color = Color.Black,       // Яркий токсичный чекбокс
 
      override val iconImage: ImageVector = Icons.Default.Image,
      override val iconAdd: ImageVector = Icons.Default.AddCircleOutline,
