@@ -277,8 +277,8 @@ fun CardItem(
                         onCheckedChange = { onClick(item, CHANGE) },
                         modifier = Modifier.padding(end = 4.dp).size(24.dp),
                         colors = CheckboxDefaults.colors(
-                            checkedColor = theme.cardItemBorderTrue,
-                            uncheckedColor = theme.chekBoxTint,
+                            checkedColor = theme.chekBoxOn,
+                            uncheckedColor = theme.chekBoxOff,
                             checkmarkColor = theme.chekBoxTint
                         )
                     )
@@ -427,8 +427,10 @@ fun CardItem(
                                                 )
                                             },
                                             colors = CheckboxDefaults.colors(
-                                                checkedColor = theme.chekBoxTint,
+                                                checkedColor = theme.chekBoxOn,
                                                 uncheckedColor = theme.tintCheckBoxSubItemOff,
+                                                checkmarkColor = theme.chekBoxTint
+
                                             ),
                                             modifier = Modifier.size(24.dp)
                                         )
