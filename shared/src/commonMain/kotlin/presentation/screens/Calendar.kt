@@ -74,22 +74,23 @@ fun Calendar(
     viewModel: MainViewModel,
     onClickSubItem: (SubItem, Int) -> Unit = { _, _ -> },
     onSubDragDropped: (List<SubItem>) -> Unit = {},
-    onClick : (Item, Int) -> Unit = {_,_->},
-    onAddItem : (Long) -> Unit = {}){
+    onClick: (Item, Int) -> Unit = { _, _ -> },
+    onAddItem: (Long) -> Unit = {}
+) {
 
 
     val listItems by viewModel.getCalendarWithSubItemsCombine.collectAsStateWithLifecycle(emptyList())
 
-        CalendarContent(
+    CalendarContent(
         listItems = listItems,
-        selectedFileUri = {uri-> viewModel.getUri(uri)},
+        selectedFileUri = { uri -> viewModel.getUri(uri) },
         theme = viewModel.themeState,
         size = viewModel.sizeState,
         onSubDragDropped = onSubDragDropped,
         onClick = onClick,
         onClickSubItem = onClickSubItem,
         onAddItem = onAddItem,
-        message = {message-> viewModel.sendMessage(message) })
+        message = { message -> viewModel.sendMessage(message) })
 
 
 }
@@ -100,14 +101,16 @@ fun CalendarContent(
     listItems: List<ItemWithSubItems> = emptyList(),
     selectedFileUri: (String) -> String = { _ -> "" },
     theme: Theme = ThemeNeon(),
-    size : Size = SizeNormal(),
-    onClick : (Item, Int) -> Unit = {_,_->},
+    size: Size = SizeNormal(),
+    onClick: (Item, Int) -> Unit = { _, _ -> },
     onClickSubItem: (SubItem, Int) -> Unit = { _, _ -> },
     onSubDragDropped: (List<SubItem>) -> Unit = {},
-    onAddItem : (Long) -> Unit = {},
-    message : (String) -> Unit = {} ) {
+    onAddItem: (Long) -> Unit = {},
+    message: (String) -> Unit = {}
+) {
 
-    val today = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
+    val today =
+        remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
     val currentMonth = remember { YearMonth.now() }
     val startMonth = remember { currentMonth.minusMonths(100) }
     val endMonth = remember { currentMonth.plusMonths(100) }
@@ -119,7 +122,7 @@ fun CalendarContent(
     val tasksByDate = remember(listItems) {
         listItems.groupBy { item ->
             Instant.fromEpochMilliseconds(item.item.alarmTime)
-                .toLocalDateTime(TimeZone.currentSystemDefault()).date 
+                .toLocalDateTime(TimeZone.currentSystemDefault()).date
         }
     }
 
@@ -143,7 +146,7 @@ fun CalendarContent(
 
     Column(
         modifier = Modifier.fillMaxWidth()
-            ) {
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -153,24 +156,27 @@ fun CalendarContent(
 
             item {
                 Surface(
-                color = theme.backgroundCalendar,
-                border = BorderStroke(1.dp, theme.noteBookBorder),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.padding(16.dp)
+                    color = theme.backgroundCalendar,
+                    border = BorderStroke(1.dp, theme.noteBookBorder),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                
+
                     HorizontalCalendar(
                         modifier = Modifier.fillMaxWidth(),
                         state = state,
                         dayContent = { day ->
                             val hasTasks = tasksByDate.containsKey(day.date)
-                            Day(day,
+                            Day(
+                                day,
                                 isSelected = selectedDate == day.date,
                                 theme = theme,
                                 hasTasks = hasTasks,
-                                isToday = day.date == today) { day ->
+                                isToday = day.date == today
+                            ) { day ->
                                 selectedDate = day.date
-                            }} ,
+                            }
+                        },
                         monthHeader = { month ->
                             Column(
                                 modifier = Modifier
@@ -180,8 +186,7 @@ fun CalendarContent(
                                 Row(
                                     modifier = Modifier
                                         .padding(horizontal = 16.dp)
-                                        .fillMaxWidth()
-                                    ,
+                                        .fillMaxWidth(),
 
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
@@ -191,7 +196,11 @@ fun CalendarContent(
                                         onClick = {
                                             // Используем coroutineScope, чтобы прокрутить календарь назад
                                             coroutineScope.launch {
-                                                state.animateScrollToMonth(month.yearMonth.minusMonths(1))
+                                                state.animateScrollToMonth(
+                                                    month.yearMonth.minusMonths(
+                                                        1
+                                                    )
+                                                )
                                             }
                                         }
                                     ) {
@@ -216,7 +225,11 @@ fun CalendarContent(
                                     IconButton(
                                         onClick = {
                                             coroutineScope.launch {
-                                                state.animateScrollToMonth(month.yearMonth.plusMonths(1))
+                                                state.animateScrollToMonth(
+                                                    month.yearMonth.plusMonths(
+                                                        1
+                                                    )
+                                                )
                                             }
                                         }
                                     ) {
@@ -235,9 +248,9 @@ fun CalendarContent(
                             }
                         }
                     )
-            }
-
                 }
+
+            }
             if (selectedDateTasks.isEmpty()) {
                 item {
                     Box(
@@ -267,35 +280,35 @@ fun CalendarContent(
                     onClick = onClick,
                     onClickSubItem = onClickSubItem,
                 )
-                         
+
             }
 
 
-
-
         }
-        Box(modifier = Modifier.fillMaxWidth()
-            .padding(8.dp)
+        Box(
+            modifier = Modifier.fillMaxWidth()
+                .padding(8.dp)
 
-        ){
+        ) {
 
-            IconButton(modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
+            IconButton(
+                modifier = Modifier.size(50.dp).align(Alignment.CenterEnd),
                 onClick = {
-    val systemTimeZone = TimeZone.currentSystemDefault()
-    // Получаем актуальное "сегодня" прямо в момент клика
-    val realToday = Clock.System.now().toLocalDateTime(systemTimeZone).date
+                    val systemTimeZone = TimeZone.currentSystemDefault()
+                    // Получаем актуальное "сегодня" прямо в момент клика
+                    val realToday = Clock.System.now().toLocalDateTime(systemTimeZone).date
 
-    if (selectedDate < realToday) {
-        message("Вы выбрали дату которая уже прошла")
-    } else {
-        // Конвертируем в миллисекунды только если дата валидна
-        val selectedDayMillis = selectedDate
-            .atStartOfDayIn(TimeZone.UTC)
-            .toEpochMilliseconds()
-        onAddItem(selectedDayMillis)
-    }
-},
-            ){
+                    if (selectedDate < realToday) {
+                        message("Вы выбрали дату которая уже прошла")
+                    } else {
+                        // Конвертируем в миллисекунды только если дата валидна
+                        val selectedDayMillis = selectedDate
+                            .atStartOfDayIn(TimeZone.UTC)
+                            .toEpochMilliseconds()
+                        onAddItem(selectedDayMillis)
+                    }
+                },
+            ) {
                 Icon(
                     imageVector = theme.iconAdd,
                     contentDescription = null,
@@ -333,18 +346,25 @@ fun Day(
         verticalArrangement = Arrangement.Center
     ) {
         Box(
-    modifier = Modifier
-        .size(30.dp)
-        // 1. Сначала применяем обводку по условию
-        .then(
-             if (isSelected) Modifier.background(color = theme.textColor, shape = CircleShape)
-             else if (isToday)  Modifier.border(width = 2.dp, color = theme.textColor, shape = CircleShape)
-             else Modifier
-        )
-        // 2. Только потом обрезаем контент изнутри (если необходимо)
-        .clip(CircleShape),
-    contentAlignment = Alignment.Center
-) {
+            modifier = Modifier
+                .size(30.dp)
+                // 1. Сначала применяем обводку по условию
+                .then(
+                    if (isSelected) Modifier.background(
+                        color = theme.textColor,
+                        shape = CircleShape
+                    )
+                    else if (isToday) Modifier.border(
+                        width = 2.dp,
+                        color = theme.textColor,
+                        shape = CircleShape
+                    )
+                    else Modifier
+                )
+                // 2. Только потом обрезаем контент изнутри (если необходимо)
+                .clip(CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
                 text = day.date.dayOfMonth.toString(),
                 // Если день сегодняшний, можно сделать текст белым, даже если он не выбран
@@ -363,7 +383,7 @@ fun Day(
         // Ваша иконка дела под кружком
         if (hasTasks && isCurrentMonth) {
             Icon(
-                imageVector =  Icons.Default.Circle,
+                imageVector = Icons.Default.Circle,
                 contentDescription = null,
                 modifier = Modifier
                     .padding(top = 2.dp)
@@ -424,6 +444,6 @@ fun Month.displayText(): String {
 
 @Preview(showBackground = true)
 @Composable
-fun PrevCalendar(){
+fun PrevCalendar() {
     CalendarContent(theme = ThemeNeon())
 }

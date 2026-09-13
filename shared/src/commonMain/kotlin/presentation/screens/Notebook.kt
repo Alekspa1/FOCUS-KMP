@@ -168,7 +168,8 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
                             imageVector = theme.iconDel,
                             contentDescription = null,
                             modifier = Modifier.fillMaxSize(),
-                            tint = theme.iconDelTint
+                            tint = theme.iconAddTint
+
                         )
                     }
                 }

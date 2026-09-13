@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -335,15 +336,25 @@ fun CardItem(
                             color = theme.textColor.copy(alpha = 0.15f),
                             modifier = Modifier.padding(bottom = 6.dp) // Отталкиваем текст от верхней линии
                         )
+//                        AsyncImage(
+//                            model = selectedFileUri,
+//                            contentDescription = "Превью фото",
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .height(120.dp)
+//                                .clip(RoundedCornerShape(12.dp))
+//                                .clickable { onClick(item, IMAGE) },
+//                            contentScale = ContentScale.Crop,
+//                        )
                         AsyncImage(
                             model = selectedFileUri,
                             contentDescription = "Превью фото",
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(120.dp)
+                                .fillMaxWidth()            // Занимает всю ширину карточки (минус твои паддинги)
+                                .aspectRatio(1f)           // СТРОГО делает высоту равной получившейся ширине
                                 .clip(RoundedCornerShape(12.dp))
                                 .clickable { onClick(item, IMAGE) },
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Crop, // Центрирует и аккуратно обрезает под квадрат
                         )
 
                     }
@@ -417,7 +428,7 @@ fun CardItem(
                                             },
                                             colors = CheckboxDefaults.colors(
                                                 checkedColor = theme.chekBoxTint,
-                                                uncheckedColor = theme.cardItemBorderFalse,
+                                                uncheckedColor = theme.tintCheckBoxSubItemOff,
                                             ),
                                             modifier = Modifier.size(24.dp)
                                         )
