@@ -77,6 +77,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.style.TextOverflow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,7 +155,10 @@ fun AddOrChangeItemDialog(
     AlertDialog(
         onDismissRequest = { onCancel() },
 
-        title = { Text(text = if (!isExpanded) "Сфокусироваться" else stateTextName) },
+        title = { Text(text = if (!isExpanded) "Сфокусироваться" else stateTextName,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis
+        )},
 
         text = {
 

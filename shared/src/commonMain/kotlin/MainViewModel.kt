@@ -142,11 +142,9 @@ class MainViewModel(
     }
 
 private val _sharedIntentEvent = Channel<Pair<String?, String?>>(Channel.BUFFERED)
-// 2. Публичный Flow, который Compose будет безопасно слушать на UI-слое
 val sharedIntentEvent = _sharedIntentEvent.receiveAsFlow()
 
-// 3. Этот метод вызывается из MainActivity. Он просто складывает данные в очередь,
-// не трогая изменчивый стейт диалога раньше времени!
+
 fun openDialogWithSharedData(text: String?, imageUri: String?) {
     viewModelScope.launch {
         _sharedIntentEvent.send(Pair(text, imageUri))
@@ -155,7 +153,7 @@ fun openDialogWithSharedData(text: String?, imageUri: String?) {
 
 fun openDialogByTaskId(taskId: Int) {
     viewModelScope.launch {
-        val task = db.getItemFromId(taskId) // Реализуй этот метод в Room, если его нет
+        val task = db.getItemFromId(taskId)
             showDialog = DialogState(
                 isWho = INSERT_DIALOG_ITEM,
                 item = task,
@@ -177,8 +175,6 @@ fun openDialogByTaskId(taskId: Int) {
                 calendar = false
             )
         }
-        // Превращаем Flow в разделяемый поток, который засыпает через 5 секунд после того,=
-        // как UI перестал его слушать (например, при сворачивании приложения)
         .shareIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
@@ -196,7 +192,7 @@ fun openDialogByTaskId(taskId: Int) {
                         stateTextNotebook += "\n$text"
                     }
                     TODO -> {
-                        val item = Item(name = text)
+                        val item = Item(name = text, category = categoryItemFlow.value)
                         showDialog = DialogState(isWho = INSERT_DIALOG_ITEM,item = item)
                     }
                 }
@@ -386,9 +382,9 @@ fun openDialogByTaskId(taskId: Int) {
 
     val categories: StateFlow<List<ListCategory>> = db.getAllListCategory()
     .stateIn(
-        scope = viewModelScope, // Привязываем к жизненному циклу ViewModel
-        started = SharingStarted.WhileSubscribed(5000), // Засыпает через 5 сек после закрытия экрана
-        initialValue = emptyList() // Начальное значение, пока база грузится
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
     )
 
     val getCalendarWithSubItemsCombine: StateFlow<List<ItemWithSubItems>> = combine(
@@ -419,7 +415,6 @@ fun openDialogByTaskId(taskId: Int) {
     fun getUri(fileName :  String) = image.getUri(fileName)
 
     fun saveImage(temporaryPathString: String, fileName: String) {
-        // Убираем блокировку главного потока, переключаясь на дисковый Dispatchers.IO
         viewModelScope.launch(Dispatchers.IO) {
             image.save(temporaryPathString, fileName)
         }
@@ -457,17 +452,12 @@ fun openDialogByTaskId(taskId: Int) {
         } else {
             filteredList.sortedBy { it.sort }
         }
-
-        // 💡 ОПТИМИЗАЦИЯ: Группируем ВСЕ подзадачи по idTask один раз.
-        // Получится Map<Int, List<SubItem>>, где ключ — это idTask.
         val subItemsGrouped = allSubItems.groupBy { it.idTask }
 
-        // 3. Мгновенно маппим за один проход O(N)
         sortedList.map { item ->
             val subItemsForThisTask = subItemsGrouped[item.id] ?: emptyList()
             ItemWithSubItems(
                 item = item,
-                // Сортируем уже только подзадачи конкретно этого дела
                 subItems = subItemsForThisTask.sortedBy { it.sort }
             )
         }
@@ -481,7 +471,7 @@ fun openDialogByTaskId(taskId: Int) {
             fun updateItemsOrder(newList: List<Item>) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                db.updateItemsOrder(newList)  // Один запрос, одна транзакция
+                db.updateItemsOrder(newList)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
