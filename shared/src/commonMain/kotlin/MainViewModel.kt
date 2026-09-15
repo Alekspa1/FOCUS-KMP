@@ -183,24 +183,32 @@ fun openDialogByTaskId(taskId: Int) {
 
 
 
-    fun openVoice(action: String){
+    fun openVoice(action: String) {
         viewModelScope.launch {
-            voice.openVoice().
-            onSuccess {text->
-                when(action) {
-                    NOTEBOOK -> {
-                        stateTextNotebook += "\n$text"
-                    }
-                    TODO -> {
-                        val item = Item(name = text, category = categoryItemFlow.value)
-                        showDialog = DialogState(isWho = INSERT_DIALOG_ITEM,item = item)
-                    }
-                }
-            }.
-            onFailure {sendMessage("Голосовой ввод пока доступен на вашем устройстве")  }
+            voice.openVoice()
+                .onSuccess { text -> handleVoiceSuccess(text, action) }
+                .onFailure { sendMessage("Голосовой ввод пока не доступен на вашем устройстве") }
         }
-
     }
+
+    private fun handleVoiceSuccess(text: String, action: String) {
+        if (text.isBlank()) return
+
+        when (action) {
+            NOTEBOOK -> updateNotebook(text)
+            TODO -> openTodoInsertDialog(text)
+        }
+    }
+
+    private fun updateNotebook(text: String) {
+        stateTextNotebook += "\n$text"
+    }
+
+    private fun openTodoInsertDialog(text: String) {
+        val item = Item(name = text, category = categoryItemFlow.value)
+        showDialog = DialogState(isWho = INSERT_DIALOG_ITEM, item = item)
+    }
+
     fun doImport() {
         viewModelScope.launch(Dispatchers.IO) {
             _isBackupLoading.value = true // Включаем незакрываемый лоадер

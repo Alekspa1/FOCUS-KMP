@@ -38,21 +38,20 @@ class AndroidVoiceIntentImpl : VoiceIntentRepository {
 
 
     fun initVoice(activity: ComponentActivity) {
-        voiceLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult() )   {
+        if (voiceLauncher != null) return
+
+        voiceLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { it ->
             if (it.resultCode == Activity.RESULT_OK) {
                 val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                 if (!text.isNullOrEmpty()) {
                     deferredVoice?.complete(Result.success(text[0]))
-                    deferredVoice = null
                 } else {
-                    deferredVoice?.complete(Result.failure(Exception("Речь не распознана или данные пусты")))
+                    deferredVoice?.complete(Result.success(""))
                 }
             } else {
-
-                deferredVoice?.complete(Result.failure(Exception("Голосовой ввод отменен пользователем")))
+                deferredVoice?.complete(Result.success(""))
             }
             deferredVoice = null
-
         }
     }
 
