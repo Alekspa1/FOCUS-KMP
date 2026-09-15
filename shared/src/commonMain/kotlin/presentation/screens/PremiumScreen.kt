@@ -74,6 +74,10 @@ import kotlin.time.Clock
 import presentation.dialogs.FaqPremiumDialog
 import flashlight.shared.generated.resources.Res
 import flashlight.shared.generated.resources.ic_sort_faq
+import presentation.theme.ThemeMarble
+import presentation.theme.ThemeStorm
+import presentation.theme.ThemeVolcanic
+import presentation.theme.ThemeZabor
 
 @Composable
 fun PremiumScreen(
@@ -370,7 +374,7 @@ val nameDialog = when(text){
                     modifier = Modifier.fillMaxSize(),
                     imageVector = Icons.Default.Info,
                     contentDescription = "Chek",
-                    tint = theme.chekBoxTint
+                    tint = theme.iconDelTint
                 )
 
             }
@@ -493,7 +497,7 @@ fun CardBuyPremium(
     @Preview
     @Composable
     fun PrevItemTwo() {
-        PremiumScreen()
+        PremiumScreen(theme = ThemeMarble())
 }
 
 

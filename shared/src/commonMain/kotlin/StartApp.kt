@@ -125,13 +125,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val navController = rememberNavController()
     val firstStart = viewModel.firstStart
     var stateVersion by remember { mutableStateOf(CURRENT_VERSION != viewModel.getVersion()) }
-    if(stateVersion){
-        WhatNewDialog(onClose = {
-            stateVersion = false
-            viewModel.saveVersion(CURRENT_VERSION)
-                                },
-            theme = theme)
-    }
+
     MaterialTheme(
         colorScheme = when (theme) {
             // Оставляем Неоновую и Ядовитую вместе — у них акценты совпадают
@@ -155,6 +149,13 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
             )
         }
     ) {
+        if(stateVersion){
+            WhatNewDialog(onClose = {
+                stateVersion = false
+                viewModel.saveVersion(CURRENT_VERSION)
+            },
+                theme = theme)
+        }
 
         val categories by viewModel.categories.collectAsStateWithLifecycle()
         val updateState by viewModel.updateState.collectAsStateWithLifecycle()
