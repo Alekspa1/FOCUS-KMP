@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+
+	<key>NSUserNotificationUsageDescription</key>
+	<string>Разрешите уведомления, чтобы вовремя получать напоминания о будильниках.</string>
+
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Нам нужен доступ к микрофону для распознавания голоса.</string>
+
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Нам нужно разрешение на распознавание речи, чтобы преобразовывать ваш голос в текст.</string>
+</dict>
+</plist>

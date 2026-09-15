@@ -1,0 +1,48 @@
+package data.room
+
+import androidx.room.AutoMigration
+import androidx.room.ConstructedBy
+import androidx.room.Database
+import androidx.room.DeleteColumn
+import androidx.room.RoomDatabase
+import androidx.room.RoomDatabaseConstructor
+import androidx.room.migration.AutoMigrationSpec
+import data.room.model.Item
+import data.room.model.ListCategory
+import data.room.model.SubItem
+
+
+@Database(entities = [Item::class, ListCategory::class, SubItem::class],
+    version = 12,
+    autoMigrations = [
+        AutoMigration (from = 1, to = 2),
+        AutoMigration (from = 2, to = 3),
+        AutoMigration (from = 3, to = 4),
+        AutoMigration (from = 4, to = 5),
+        AutoMigration (from = 5, to = 6),
+        AutoMigration (from = 6, to = 7),
+        AutoMigration (from = 7, to = 8),
+        AutoMigration (from = 8, to = 9),
+        AutoMigration (from = 9, to = 10, spec = myDataBase.DeleteAlarmRepeatSpec::class),
+        AutoMigration (from = 10, to = 11),
+        AutoMigration (from = 11, to = 12)
+                     ]
+
+)
+@ConstructedBy(AppDatabaseConstructor::class)
+abstract class myDataBase: RoomDatabase(){
+
+    @DeleteColumn(tableName = "Item", columnName = "changeAlarmRepeat")
+    class DeleteAlarmRepeatSpec : AutoMigrationSpec
+
+   abstract fun CourseDao(): CourseDao
+
+}
+
+
+
+@Suppress("NO_ACTUAL_FOR_EXPECT")
+expect object AppDatabaseConstructor : RoomDatabaseConstructor<myDataBase> {
+    override fun initialize(): myDataBase
+}
+
