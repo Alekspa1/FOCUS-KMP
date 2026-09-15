@@ -6,16 +6,15 @@
 
 ## 📸 Интерфейс приложения (UI)
 
-| Сплэш-скрин | Список дел  | Развернутая задача | Календарь |
+| Сплэш-скрин | Список дел | Развернутая задача | Календарь |
 | :---: | :---: | :---: | :---: |
-| <img src="screenshots/splash.png" width="200" alt="Splash"/> | <img src="screenshots/tasks.png" width="200" alt="Tasks"/> | <img src="screenshots/task_detail.png" width="200" alt="Detail"/> | <img src="screenshots/calendar.png" width="200" alt="Calendar"/> |
+| <img src="https://github.com/user-attachments/assets/1ad2a6c3-f208-4295-b270-bc9b4739bc00" width="200" alt="Сплэш-скрин"/> | <img src="https://github.com/user-attachments/assets/0dbbd871-096a-494b-b877-262ea13deb1f" width="200" alt="Список дел"/> | <img src="https://github.com/user-attachments/assets/abd96c3e-1e69-4d25-9206-50e1987d29fb" width="200" alt="Развернутая задача"/> | <img src="https://github.com/user-attachments/assets/c80c6554-dfd2-4a38-bc0c-ce23a45aca26" width="200" alt="Календарь"/> |
 
 | Текстовый Блокнот | Создание задачи | Премиум функции | Настройки |
 | :---: | :---: | :---: | :---: |
-| <img src="screenshots/notes.png" width="200" alt="Notes"/> | <img src="screenshots/create.png" width="200" alt="Create"/> | <img src="screenshots/premium.png" width="200" alt="Premium"/> | <img src="screenshots/settings.png" width="200" alt="Settings"/> |
+| <img src="https://github.com/user-attachments/assets/9e29c206-39fe-4796-a43c-74c61234b583" width="200" alt="Текстовый Блокнот"/> | <img src="https://github.com/user-attachments/assets/05466109-c67f-4a8b-8270-6c5b52720832" width="200" alt="Создание задачи"/> | <img src="https://github.com/user-attachments/assets/8d8616f1-050e-4473-9615-a65fe952ac4a" width="200" alt="Премиум функции"/> | <img width="200" alt="image" src="https://github.com/user-attachments/assets/888e684a-4517-41f7-a2d9-2b0098bcdbb2" /> |
 
 ---
-
 ## 🛠 Ключевые особенности и функционал приложения
 
 * **Полноценный системный будильник (`setAlarmClock`)**: Напоминания на Android реализованы через нативный метод `AlarmManager.setAlarmClock`. Это выводит иконку будильника в статус-бар системы и гарантирует 100% срабатывание в точную секунду, обходя любые ограничения Doze Mode и глубокого энергосбережения.
