@@ -118,6 +118,23 @@ android {
         versionName = "10"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+//    buildTypes {
+//        getByName("release") {
+//            // 1. Включаем ProGuard/R8 (Сжатие кода)
+//            // Он намертво вырежет из APK весь неиспользуемый код библиотек
+//            isMinifyEnabled = true
+//
+//            // 2. Удаляем неиспользуемые ресурсы (картинки, строки)
+//            isShrinkResources = true
+//
+//            // Стандартные правила оптимизации от Google
+//            proguardFiles(
+//                getDefaultProguardFile("proguard-android-optimize.txt"),
+//                "proguard-rules.pro"
+//            )
+//        }
+//    }  это чтобы сжимать apk
 }
 
 
