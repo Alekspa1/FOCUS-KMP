@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -30,6 +32,7 @@ fun WhatNewDialog(onClose : () -> Unit = {},theme: Theme = ThemeNeon()){
         title = { Text("Что нового", color = theme.textColor) },
         text = {
             Column(modifier = Modifier
+                .verticalScroll(rememberScrollState())
                 .fillMaxWidth()
                 .padding(horizontal = 10.dp)){
             Text(text = "Добавлены новые темы", color = theme.textColor)
@@ -38,7 +41,7 @@ fun WhatNewDialog(onClose : () -> Unit = {},theme: Theme = ThemeNeon()){
                     color = theme.textColor.copy(alpha = 0.15f),
                     modifier = Modifier.padding(top = 6.dp)
                 )
-            Text(text = "Возможность создание подкатегорий", color = theme.textColor)
+            Text(text = "Возможность создание подзадач", color = theme.textColor)
 
                 HorizontalDivider(
                     thickness = 1.dp,
