@@ -8,11 +8,11 @@
 
 | Сплэш-скрин | Список дел | Развернутая задача | Календарь |
 | :---: | :---: | :---: | :---: |
-| <img width="220" alt="image" src="https://github.com/user-attachments/assets/38b75414-d9b1-4dcf-9459-19a6a9e08b4c" /> | <img width="220"  alt="image" src="https://github.com/user-attachments/assets/a26274d0-1c01-4860-874e-2e6791e2d09c" /> | <img width="220" alt="image" src="https://github.com/user-attachments/assets/79cb90fe-17fd-45fd-9226-569f05b0e9ce" /> | <img width="576" height="1280" alt="image" src="https://github.com/user-attachments/assets/cb57a33a-77d0-4f0e-a52e-24c991aeef7c" /> |
+| <img width="220" alt="image" src="https://github.com/user-attachments/assets/38b75414-d9b1-4dcf-9459-19a6a9e08b4c" /> | <img width="220"  alt="image" src="https://github.com/user-attachments/assets/a26274d0-1c01-4860-874e-2e6791e2d09c" /> | <img width="220" alt="image" src="https://github.com/user-attachments/assets/79cb90fe-17fd-45fd-9226-569f05b0e9ce" /> | <img width="220" alt="image" src="https://github.com/user-attachments/assets/cb57a33a-77d0-4f0e-a52e-24c991aeef7c" /> |
 
 | Текстовый Блокнот | Создание задачи | Премиум функции | Настройки |
 | :---: | :---: | :---: | :---: |
-| <img width="576" height="1280" alt="image" src="https://github.com/user-attachments/assets/e72b878d-0f42-46ef-9ef5-f54ac13c26be" /> | <img width="220" alt="image" src="https://github.com/user-attachments/assets/680f8332-9e78-474c-bd89-46c397c3ae73" /> | <img width="220"  alt="image" src="https://github.com/user-attachments/assets/21353dd4-5992-4aab-90c7-248e7c04f33b" /> | <img width="220"  alt="image" src="https://github.com/user-attachments/assets/f4167866-39d9-471b-a20d-7f0ac84cec76" /> |
+| <img width="220" alt="image" src="https://github.com/user-attachments/assets/e72b878d-0f42-46ef-9ef5-f54ac13c26be" /> | <img width="220" alt="image" src="https://github.com/user-attachments/assets/680f8332-9e78-474c-bd89-46c397c3ae73" /> | <img width="220"  alt="image" src="https://github.com/user-attachments/assets/21353dd4-5992-4aab-90c7-248e7c04f33b" /> | <img width="220"  alt="image" src="https://github.com/user-attachments/assets/f4167866-39d9-471b-a20d-7f0ac84cec76" /> |
 
 ---
 ## 🛠 Ключевые особенности и функционал приложения
