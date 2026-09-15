@@ -17,6 +17,8 @@ object CommonConst {
     const val ADD_CATEGORY = "ADD_CATEGORY"
     const val ZIP_PICKER = "ZIP_PICKER"
     const val IMAGE_PICKER = "IMAGE_PICKER"
+    const val VERSION = "VERSION"
+    const val CURRENT_VERSION = 35
 
     const val NOTEBOOK = "NOTEBOOK"
     const val TODO = "TODO"

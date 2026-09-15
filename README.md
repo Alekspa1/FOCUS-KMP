@@ -6,7 +6,7 @@
 
 ## 📸 Интерфейс приложения (UI)
 
-| Сплэш-скрин | Список дел (Ядовитая тема) | Развернутая задача | Календарь |
+| Сплэш-скрин | Список дел  | Развернутая задача | Календарь |
 | :---: | :---: | :---: | :---: |
 | <img src="screenshots/splash.png" width="200" alt="Splash"/> | <img src="screenshots/tasks.png" width="200" alt="Tasks"/> | <img src="screenshots/task_detail.png" width="200" alt="Detail"/> | <img src="screenshots/calendar.png" width="200" alt="Calendar"/> |
 

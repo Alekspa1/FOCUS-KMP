@@ -1,8 +1,9 @@
+import org.gradle.declarative.dsl.schema.FqName.Empty.packageName
 import org.gradle.kotlin.dsl.implementation
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
-    id("com.android.library")
+    id("com.android.application")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp") version "2.3.0"
@@ -14,6 +15,7 @@ room {
     // Указывает Room, куда сохранять JSON-схемы базы данных
     schemaDirectory("$projectDir/schemas")
 }
+
 
 kotlin {
     // 1. Таргеты для Android и Desktop
@@ -105,13 +107,21 @@ kotlin {
 }
 
 android {
-    namespace = "com.dragon.shared"
+    namespace = "com.exampl3.flashlight"
     compileSdk = 36
 
     defaultConfig {
+        applicationId = "com.exampl3.flashlight"
         minSdk = 26
+        targetSdk = 36
+        versionCode = 35
+        versionName = "10"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 }
+
+
+
 
 dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling:1.10.0")

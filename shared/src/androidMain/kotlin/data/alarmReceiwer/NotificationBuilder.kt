@@ -15,10 +15,12 @@ import android.media.AudioAttributes
 import android.net.Uri
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
-import com.dragon.shared.R
+import com.exampl3.flashlight.R
 import data.perository.MultiplatrormAppSettings
 import data.room.model.Item
 import domain.repostirory.SaveDeleteImageRepositpry
+import flashlight.shared.generated.resources.Res
+import flashlight.shared.generated.resources.icon
 import presentation.MainActivity
 
 

@@ -1,3 +1,4 @@
+import CommonConst.CURRENT_VERSION
 import CommonConst.DELETE_DIALOG_CATEGORY
 import CommonConst.FIRST_NAVIGATION_FAQ_SCREEN
 import CommonConst.FIRST_NAVIGATION_MAIN_SCREEN
@@ -94,6 +95,7 @@ import presentation.MainPager
 import presentation.dialogs.AddOrChangeCategoryDialog
 import presentation.dialogs.DeleteDialog
 import presentation.dialogs.DialogState
+import presentation.dialogs.WhatNewDialog
 import presentation.dialogs.parsePlatformUri
 import presentation.screens.Faq
 import presentation.screens.PremiumScreen
@@ -122,6 +124,14 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
     val firstStart = viewModel.firstStart
+    var stateVersion by remember { mutableStateOf(CURRENT_VERSION != viewModel.getVersion()) }
+    if(stateVersion){
+        WhatNewDialog(onClose = {
+            stateVersion = false
+            viewModel.saveVersion(CURRENT_VERSION)
+                                },
+            theme = theme)
+    }
     MaterialTheme(
         colorScheme = when (theme) {
             // Оставляем Неоновую и Ядовитую вместе — у них акценты совпадают
@@ -150,7 +160,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
         val updateState by viewModel.updateState.collectAsStateWithLifecycle()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-        // var isCommonMode by remember { mutableStateOf(false) }
+
         val route by viewModel.route.collectAsStateWithLifecycle()
         val category = viewModel.showDialog.category
 
@@ -295,7 +305,7 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
                                         }
 
                                         SHARED_ClICK -> {
-                                            viewModel.sendMessage("Общие дела появяться в следующих обновлениях")
+                                            viewModel.sendMessage("Общие дела появятся в следующих обновлениях")
                                         }
                                     }
                                 },

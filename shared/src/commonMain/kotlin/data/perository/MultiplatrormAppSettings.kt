@@ -14,6 +14,7 @@ import domain.repostirory.SettingsAppRepository
 
 import CommonConst.THEME_FUTURE
 import CommonConst.THEME_SETTINGS
+import CommonConst.VERSION
 
 
 class MultiplatrormAppSettings(private val settings: Settings) : SettingsAppRepository {
@@ -42,5 +43,11 @@ class MultiplatrormAppSettings(private val settings: Settings) : SettingsAppRepo
  override   fun saveOldUriAlarm(uri: String){
     settings.putString(URI_OLD, uri)
  }
+
+    override fun getVersion(): Int = settings.getInt(VERSION, 0)
+    override fun saveVersion(version: Int){
+        settings.putInt(VERSION, version)
+    }
+
 
 }

@@ -98,9 +98,7 @@ class MainViewModel(
 
     ) : ViewModel() {
 
-    fun testPremium(){
-    savePremium(!pref.getPremium())    
-    }
+
     private val _soundState = MutableStateFlow<Map<String, String>>(emptyMap())
     val soundState = _soundState.asStateFlow()
 
@@ -195,8 +193,7 @@ fun openDialogByTaskId(taskId: Int) {
             onSuccess {text->
                 when(action) {
                     NOTEBOOK -> {
-
-                        stateTextNotebook += text
+                        stateTextNotebook += "\n$text"
                     }
                     TODO -> {
                         val item = Item(name = text)
@@ -376,6 +373,12 @@ fun openDialogByTaskId(taskId: Int) {
         }
 
     fun getPremium() = pref.getPremium()
+
+    fun saveVersion(verson: Int){
+        settingsPref.saveVersion(verson)
+    }
+
+    fun getVersion() = settingsPref.getVersion()
     
     private val _categoryItemFlow = MutableStateFlow("Повседневные")
     val categoryItemFlow = _categoryItemFlow.asStateFlow()

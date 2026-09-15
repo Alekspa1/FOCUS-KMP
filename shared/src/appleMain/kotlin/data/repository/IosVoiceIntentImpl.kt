@@ -3,9 +3,16 @@ package data.repository
 import domain.repostirory.VoiceIntentRepository
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import platform.AVFAudio.AVAudioEngine
+import platform.AVFAudio.AVAudioPCMBuffer
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryRecord
 import platform.AVFAudio.AVAudioSessionModeMeasurement
@@ -19,30 +26,36 @@ import platform.Speech.SFSpeechRecognizerAuthorizationStatus
 
 class IosVoiceIntentImpl : VoiceIntentRepository {
 
-    private val audioEngine = AVAudioEngine() // Управляет аудио-потоком с микрофона
-    private val speechRecognizer =
-        SFSpeechRecognizer(NSLocale.currentLocale) // Нативный распознаватель
+    private val audioEngine = AVAudioEngine()
+
+    // Принудительно задаём русскую локаль для распознавания речи
+    private val speechRecognizer = SFSpeechRecognizer(NSLocale("ru-RU"))
+
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest? = null
     private var recognitionTask: SFSpeechRecognitionTask? = null
 
     private var deferredVoice: CompletableDeferred<Result<String>>? = null
 
+    // Специфичный для платформы Scope для управления таймером тишины
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var silenceJob: Job? = null
+
     override suspend fun openVoice(): Result<String> = withContext(Dispatchers.Main) {
-        // Сразу проверяем доступность распознавателя
-        if (speechRecognizer == null || !speechRecognizer.isAvailable()) {
-            return@withContext Result.failure(Exception("Распознавание речи недоступно"))
+        if (!speechRecognizer.isAvailable()) {
+            return@withContext Result.failure(Exception("Распознавание речи недоступно или отключено в настройках"))
         }
 
         val deferred = CompletableDeferred<Result<String>>()
         deferredVoice = deferred
 
-        // Запрашиваем разрешения у пользователя
+        // Запрос разрешений на использование распознавания речи
         SFSpeechRecognizer.requestAuthorization { status ->
-            if (status == SFSpeechRecognizerAuthorizationStatus.SFSpeechRecognizerAuthorizationStatusAuthorized) {
-                // Если разрешено — запускаем запись
-                startRecording(deferred)
-            } else {
-                deferred.complete(Result.failure(Exception("Доступ к распознаванию речи отклонен")))
+            scope.launch {
+                if (status == SFSpeechRecognizerAuthorizationStatus.SFSpeechRecognizerAuthorizationStatusAuthorized) {
+                    startRecording(deferred)
+                } else {
+                    deferred.complete(Result.failure(Exception("Доступ к распознаванию речи отклонен пользователем")))
+                }
             }
         }
 
@@ -52,7 +65,6 @@ class IosVoiceIntentImpl : VoiceIntentRepository {
     @OptIn(ExperimentalForeignApi::class)
     private fun startRecording(deferred: CompletableDeferred<Result<String>>) {
         try {
-            // Сбрасываем старые задачи, если они были
             stopRecording()
 
             val audioSession = AVAudioSession.sharedInstance()
@@ -60,52 +72,77 @@ class IosVoiceIntentImpl : VoiceIntentRepository {
             audioSession.setMode(AVAudioSessionModeMeasurement, error = null)
             audioSession.setActive(true, withOptions = 0u, error = null)
 
+            // Включаем частичные результаты, чтобы таймер тишины мог анализировать текст "на лету"
             recognitionRequest = SFSpeechAudioBufferRecognitionRequest().apply {
-                shouldReportPartialResults = false // Нам нужен только финальный текст, как на Android
+                shouldReportPartialResults = true
             }
 
             val inputNode = audioEngine.inputNode
             val recordingFormat = inputNode.outputFormatForBus(0u)
 
-            // Устанавливаем «ответвитель» (Tap) на микрофон для передачи буфера в Apple Speech
-            inputNode.installTapOnBus(0u, bufferSize = 1024u, format = recordingFormat) { buffer, _ ->
-                recognitionRequest?.appendAudioPCMBuffer(buffer!!)
+            // Явно типизируем buffer как AVAudioPCMBuffer?, чтобы избежать проблем интеропа Kotlin/Native
+            inputNode.installTapOnBus(0u, bufferSize = 1024u, format = recordingFormat) { buffer: AVAudioPCMBuffer?, _ ->
+                if (buffer != null) {
+                    recognitionRequest?.appendAudioPCMBuffer(buffer)
+                }
             }
 
             audioEngine.prepare()
             audioEngine.startAndReturnError(null)
 
-            // Запуск сессии распознавания речи
+            var lastRecognizedText = ""
+
             recognitionTask = speechRecognizer.recognitionTaskWithRequest(recognitionRequest!!) { result, error ->
                 if (error != null) {
-                    deferred.complete(Result.failure(Exception(error.localizedDescription)))
+                    // Если корутина уже завершилась успехом по таймеру тишины, игнорируем системную ошибку отмены сессии
+                    if (!deferred.isCompleted) {
+                        deferred.complete(Result.failure(Exception(error.localizedDescription)))
+                    }
                     stopRecording()
                 } else if (result != null) {
-                    if (result.isFinal()) {
-                        val text = result.bestTranscription.formattedString
-                        deferred.complete(Result.success(text))
+                    lastRecognizedText = result.bestTranscription.formattedString
+
+                    // Сбрасываем предыдущий таймер тишины при каждом новом слове
+                    silenceJob?.cancel()
+                    silenceJob = scope.launch {
+                        delay(1500) // Пауза в 1.5 секунды означает, что пользователь закончил говорить
+
+                        if (lastRecognizedText.isNotBlank() && !deferred.isCompleted) {
+                            deferred.complete(Result.success(lastRecognizedText))
+                        } else if (!deferred.isCompleted) {
+                            deferred.complete(Result.failure(Exception("Превышено время ожидания речи (тишина)")))
+                        }
                         stopRecording()
                     }
                 }
             }
         } catch (e: Exception) {
-            deferred.complete(Result.failure(e))
+            if (!deferred.isCompleted) {
+                deferred.complete(Result.failure(e))
+            }
             stopRecording()
         }
     }
 
     private fun stopRecording() {
-        audioEngine.stop()
-        audioEngine.inputNode.removeTapOnBus(0u)
+        silenceJob?.cancel()
+        silenceJob = null
+
+        if (audioEngine.isRunning()) {
+            audioEngine.stop()
+            audioEngine.inputNode.removeTapOnBus(0u)
+        }
+
         recognitionRequest?.endAudio()
         recognitionRequest = null
+
         recognitionTask?.cancel()
         recognitionTask = null
     }
 
-    // Вызывать при уничтожении экрана / прерывании операции
     fun destroyVoice() {
         stopRecording()
+        scope.cancel()
         if (deferredVoice?.isActive == true) {
             deferredVoice?.cancel()
         }

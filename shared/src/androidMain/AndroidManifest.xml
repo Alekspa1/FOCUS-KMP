@@ -23,10 +23,10 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="false"
-        android:icon="@mipmap/ic_icon"
+        android:icon="@mipmap/ic_lcon"
         android:label="Focus"
         tools:replace="android:label"
-        android:roundIcon="@mipmap/ic_icon_round"
+        android:roundIcon="@mipmap/ic_lcon_round"
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.FlashLight"
         tools:targetApi="31">
