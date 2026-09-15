@@ -92,10 +92,10 @@ jobs:
         run: ./gradlew :shared:testDebugUnitTest
 
       - name: Run Quality Checks for Release
-        run: ./gradlew :app:compileReleaseSources
+        run: ./gradlew :shared:compileReleaseSources
 
       - name: Build Release APK
-        run: ./gradlew :app:assembleRelease
+        run: ./gradlew :shared:assembleRelease
 
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
