@@ -17,5 +17,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "FlashLight"
-include(":app")
 include(":shared")
