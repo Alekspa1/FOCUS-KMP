@@ -13,6 +13,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.LaunchedEffect
 import data.repostitory.AndroidPlatformFilePickerImpl
+import data.repostitory.AndroidVoiceIntentImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -22,9 +23,11 @@ import presentation.screens.PremiumScreen
 
 class MainActivity : ComponentActivity() {
 
-    val permissionImp: AndroidPermissionImpl by inject()
+    private val permissionImp: AndroidPermissionImpl by inject()
     private val mainViewModel: MainViewModel by inject()
-    val filePickerImp: AndroidPlatformFilePickerImpl by inject()
+    private val filePickerImp: AndroidPlatformFilePickerImpl by inject()
+    private val openVoiceImpl : AndroidVoiceIntentImpl by inject()
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +35,7 @@ class MainActivity : ComponentActivity() {
 
         permissionImp.initLauncher(this@MainActivity)
         filePickerImp.initLauncher(this@MainActivity)
+        openVoiceImpl.initVoice(this@MainActivity)
         if (savedInstanceState == null) {
             val intent = Intent(this@MainActivity, WarmupActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -63,6 +67,7 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         permissionImp.destroyLaunch()
         filePickerImp.destroyLauncher()
+        openVoiceImpl.destroyVoice()
     }
 
     private fun handleNotificationIntent(intent: Intent?) {

@@ -1,6 +1,7 @@
 package presentation.screens
 
 import CommonConst
+import CommonConst.NOTEBOOK
 import MainViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -74,12 +75,10 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
 
     NoteBookContent(
         text = viewModel.stateTextNotebook,
-        showDialog = viewModel.showDialog,
-       // onResultDialog = {dialog-> viewModel.showDialog = dialog},
         onTextChange = {newtext->
             viewModel.stateTextNotebook = newtext},
         theme = viewModel.themeState,
-        size = viewModel.sizeState
+        onVoiceIntent = {viewModel.openVoice(NOTEBOOK)}
         )
 
 
@@ -88,20 +87,12 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
     @Composable
     fun NoteBookContent(
         text: String,
-        showDialog : DialogState = DialogState(),
-       // onResultDialog : (DialogState) -> Unit = {},
         onTextChange : (String) -> Unit = {},
         theme: Theme = ThemeNeon(),
-        size: Size = SizeNormal()
+        onVoiceIntent : () -> Unit = {}
         )
     {
             var openDialog by remember { mutableStateOf(false) }
-            // if(showDialog.isWho == CommonConst.DELETE_DIALOG_ITEM){
-            // DeleteDialog(theme = theme) {result->
-            // if(result) onTextChange("")
-            //  onResultDialog(DialogState())
-            // }
-            // }
 
             if(openDialog) {
             DeleteDialog(theme = theme) {result->
@@ -134,15 +125,8 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
                     focusedTextColor = theme.textColor,
                     unfocusedTextColor = theme.textColor,
 
-                    // 1. ТВОЙ БИРЮЗОВЫЙ НЕОН НА ФОНЕ (Solid):
                     focusedContainerColor = theme.noteBookBackground,
                     unfocusedContainerColor = theme.noteBookBackground,
-
-                    // 2. ТВОЙ СИНЕ-ГОЛУБОЙ НЕОН НА ОБВОДКЕ (Stroke):
-                   // focusedBorderColor = Color(0x9900E2FF),
-                   // unfocusedBorderColor = Color(0x9900E2FF),
-
-                    // Курсор делаем сочным сине-голубым:
                     cursorColor = theme.textColor
                 )
             )
@@ -151,7 +135,7 @@ fun Notebook(viewModel: MainViewModel,pageIndex: Int){
                 Box(modifier = Modifier.fillMaxWidth().padding(8.dp)){
                         IconButton(
                             modifier = Modifier.size(50.dp).align(Alignment.Center),
-                            onClick = { },
+                            onClick = {onVoiceIntent() },
                         ) {
                             Icon(
                                 imageVector = theme.iconMicro,

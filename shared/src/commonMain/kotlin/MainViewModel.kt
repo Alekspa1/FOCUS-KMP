@@ -6,6 +6,8 @@ import CommonConst.ALARM_SETTINGS
 import CommonConst.BATTERY_OPTIMIZATION
 import CommonConst.DEFAULT_DIALOG
 import CommonConst.INSERT_DIALOG_ITEM
+import CommonConst.NOTEBOOK
+import CommonConst.TODO
 import CommonConst.NOTIFICATION
 import CommonConst.SECOND_NAVIGATION_PERSONAL_MAIN_PAGER
 import CommonConst.SIZE_LARGE
@@ -42,6 +44,7 @@ import domain.repostirory.SaveDeleteImageRepositpry
 import domain.repostirory.SettingsAppRepository
 import domain.repostirory.SharedPrefRepository
 import domain.repostirory.TelegramSyncServiceRepository
+import domain.repostirory.VoiceIntentRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -90,7 +93,8 @@ class MainViewModel(
     private val paySdk : PaySdkRepository,
     private val telegramSync : TelegramSyncServiceRepository,
     private val backUpManager : BackupManagerRepository,
-    private val picker: PickerRepository
+    private val picker: PickerRepository,
+    private val voice : VoiceIntentRepository
 
     ) : ViewModel() {
 
@@ -185,7 +189,25 @@ fun openDialogByTaskId(taskId: Int) {
 
 
 
+    fun openVoice(action: String){
+        viewModelScope.launch {
+            voice.openVoice().
+            onSuccess {text->
+                when(action) {
+                    NOTEBOOK -> {
 
+                        stateTextNotebook += text
+                    }
+                    TODO -> {
+                        val item = Item(name = text)
+                        showDialog = DialogState(isWho = INSERT_DIALOG_ITEM,item = item)
+                    }
+                }
+            }.
+            onFailure {sendMessage("Голосовой ввод пока доступен на вашем устройстве")  }
+        }
+
+    }
     fun doImport() {
         viewModelScope.launch(Dispatchers.IO) {
             _isBackupLoading.value = true // Включаем незакрываемый лоадер

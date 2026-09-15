@@ -122,69 +122,69 @@ fun StartApp(viewModel: MainViewModel = koinViewModel()) {
     val premiumState by viewModel.premiumState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
     val firstStart = viewModel.firstStart
-MaterialTheme(
-    colorScheme = when (theme) {
-        // Оставляем Неоновую и Ядовитую вместе — у них акценты совпадают
-        is ThemePoison, is ThemeNeon, is ThemeVolcanic, is ThemeStorm -> darkColorScheme(
-            primary = theme.textColor, // основной цвет
-            surfaceContainerHigh = theme.backgroundDialog,
-            primaryContainer = Color(0xFF616161), // цвет в диалоге выбора времени часы(если выделены)
-            onPrimaryContainer = theme.textColor,
-            surfaceContainerHighest = Color(0xFF616161), // цвет в диалоге выбора времени минуты(если не выделены)
-            onSurfaceVariant = theme.textColor,
+    MaterialTheme(
+        colorScheme = when (theme) {
+            // Оставляем Неоновую и Ядовитую вместе — у них акценты совпадают
+            is ThemePoison, is ThemeNeon, is ThemeVolcanic, is ThemeStorm -> darkColorScheme(
+                primary = theme.textColor, // основной цвет
+                surfaceContainerHigh = theme.backgroundDialog,
+                primaryContainer = Color(0xFF616161), // цвет в диалоге выбора времени часы(если выделены)
+                onPrimaryContainer = theme.textColor,
+                surfaceContainerHighest = Color(0xFF616161), // цвет в диалоге выбора времени минуты(если не выделены)
+                onSurfaceVariant = theme.textColor,
 
 
-        )
+                )
 
-        is ThemeMarble, is ThemeZabor, is ThemePlatinum -> lightColorScheme(
-            primary = theme.textColor,
-            surface = theme.backgroundDialog,
-            onSurface = theme.textColor,
-            surfaceContainerHigh = theme.backgroundDialog,
-            onSurfaceVariant = theme.textDesc
-        )
-    }
-){
+            is ThemeMarble, is ThemeZabor, is ThemePlatinum -> lightColorScheme(
+                primary = theme.textColor,
+                surface = theme.backgroundDialog,
+                onSurface = theme.textColor,
+                surfaceContainerHigh = theme.backgroundDialog,
+                onSurfaceVariant = theme.textDesc
+            )
+        }
+    ) {
 
         val categories by viewModel.categories.collectAsStateWithLifecycle()
         val updateState by viewModel.updateState.collectAsStateWithLifecycle()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-       // var isCommonMode by remember { mutableStateOf(false) }
+        // var isCommonMode by remember { mutableStateOf(false) }
         val route by viewModel.route.collectAsStateWithLifecycle()
         val category = viewModel.showDialog.category
 
         val snackbarHostState = remember { SnackbarHostState() }
         val productList by viewModel.productState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        // 1. Запускаем сбор тостов в отдельной фоновой корутине
-        launch {
-            viewModel.toast.collect { message ->
-                snackbarHostState.showSnackbar(message)
+        LaunchedEffect(Unit) {
+            // 1. Запускаем сбор тостов в отдельной фоновой корутине
+            launch {
+                viewModel.toast.collect { message ->
+                    snackbarHostState.showSnackbar(message)
+                }
             }
-        }
 
-        // 2. Запускаем сбор интентов в отдельной фоновой корутине
-        launch {
-            viewModel.sharedIntentEvent.collect { (text, imageUri) ->
-                viewModel.showDialog = DialogState(
-                    isWho = INSERT_DIALOG_ITEM,
-                    calendar = false,
-                    date = 0L,
-                    item = Item(
-                        id = 0,
-                        name = text ?: "",
-                        uri = imageUri ?: "",
-                        category = "Повседневные"
+            // 2. Запускаем сбор интентов в отдельной фоновой корутине
+            launch {
+                viewModel.sharedIntentEvent.collect { (text, imageUri) ->
+                    viewModel.showDialog = DialogState(
+                        isWho = INSERT_DIALOG_ITEM,
+                        calendar = false,
+                        date = 0L,
+                        item = Item(
+                            id = 0,
+                            name = text ?: "",
+                            uri = imageUri ?: "",
+                            category = "Повседневные"
+                        )
                     )
-                )
+                }
             }
+
+            viewModel.updateAlarm()
+
         }
-
-        viewModel.updateAlarm()
-
-    }
         when (viewModel.showDialog.isWho) {
             DELETE_DIALOG_CATEGORY -> {
                 DeleteDialog(theme = theme) { result ->
@@ -232,26 +232,26 @@ MaterialTheme(
 
                 }
             }
-        ) { innerPadding -> 
-    Box(modifier = Modifier.fillMaxSize()) { 
-        Image( 
-            painter = painterResource(theme.backgroundStart), 
-            contentDescription = null, 
-            modifier = Modifier.fillMaxSize(), 
-            contentScale = ContentScale.FillBounds 
-        ) 
-        
-        NavHost( 
-            navController = navController, 
-            startDestination = FIRST_NAVIGATION_MAIN_SCREEN
-        ) {
-            // ЭКРАН №1: Главный экран
-            composable( 
-                route = FIRST_NAVIGATION_MAIN_SCREEN,
-                // Старый экран замирает на месте и не исчезает, пока новый заезжает поверх
-                exitTransition = { androidx.compose.animation.ExitTransition.None },
-                popEnterTransition = { androidx.compose.animation.EnterTransition.None }
-            ) {
+        ) { innerPadding ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = painterResource(theme.backgroundStart),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds
+                )
+
+                NavHost(
+                    navController = navController,
+                    startDestination = FIRST_NAVIGATION_MAIN_SCREEN
+                ) {
+                    // ЭКРАН №1: Главный экран
+                    composable(
+                        route = FIRST_NAVIGATION_MAIN_SCREEN,
+                        // Старый экран замирает на месте и не исчезает, пока новый заезжает поверх
+                        exitTransition = { androidx.compose.animation.ExitTransition.None },
+                        popEnterTransition = { androidx.compose.animation.EnterTransition.None }
+                    ) {
 
 //                val lifecycleOwner = LocalLifecycleOwner.current
 //                LaunchedEffect(lifecycleOwner.lifecycle) {
@@ -260,107 +260,160 @@ MaterialTheme(
 //                    }
 //                }
 
-                    Box(modifier = Modifier.fillMaxSize()){
-                        StartAppContent(
-                            isPersonalRoute = route,
-                            onPersonalModel = { route->  viewModel.writeSecondRounte(route) },
-                            categories = categories,
-                            toastEvents = {message -> viewModel.sendMessage(message) },
-                            updateCategory = { category -> viewModel.updateCategory(category) },
-                            openPager = { onOpenDrawer, pagerState -> MainPager(innerPadding, viewModel, onOpenDrawer, pagerState) },
-                            drawerState = drawerState,
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            StartAppContent(
+                                isPersonalRoute = route,
+                                onPersonalModel = { route -> viewModel.writeSecondRounte(route) },
+                                categories = categories,
+                                toastEvents = { message -> viewModel.sendMessage(message) },
+                                updateCategory = { category -> viewModel.updateCategory(category) },
+                                openPager = { onOpenDrawer, pagerState ->
+                                    MainPager(
+                                        innerPadding,
+                                        viewModel,
+                                        onOpenDrawer,
+                                        pagerState
+                                    )
+                                },
+                                drawerState = drawerState,
+                                theme = viewModel.themeState,
+                                size = viewModel.sizeState,
+                                premium = premiumState,
+                                update = updateState,
+                                onClick = { click ->
+                                    when (click) {
+                                        PREMIUM_CLICK -> {
+                                            navController.navigate(FIRST_NAVIGATION_PREMIUM_SCREEN)
+                                        }
+
+                                        UPGRATE_CLICK -> {
+                                            viewModel.openUpdateApp()
+                                        }
+
+                                        SETTINGS_CLICK -> {
+                                            navController.navigate(FIRST_NAVIGATION_SETTINGS_SCREEN)
+                                        }
+
+                                        SHARED_ClICK -> {
+                                            viewModel.sendMessage("Общие дела появяться в следующих обновлениях")
+                                        }
+                                    }
+                                },
+                                onClickCategory = { listCategory, action ->
+                                    when (action) {
+                                        INSERT_DIALOG_CATEGORY -> {
+                                            if (premiumState) {
+                                                viewModel.showDialog = DialogState(
+                                                    INSERT_DIALOG_CATEGORY,
+                                                    category = listCategory
+                                                )
+                                            } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
+                                        }
+
+                                        DELETE_DIALOG_CATEGORY -> {
+                                            viewModel.showDialog = DialogState(
+                                                DELETE_DIALOG_CATEGORY,
+                                                category = listCategory
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                            if (firstStart && viewModel.getPlatform != PLATFORM_ANDROID) {
+                                SplashScreen(onAnimationDone = { viewModel.firstStart = false })
+                            }
+
+
+                        }
+                    }
+
+                    // ЭКРАН №2: Настройки
+                    composable(
+                        route = FIRST_NAVIGATION_SETTINGS_SCREEN,
+
+                        enterTransition = {
+                            slideInHorizontally(
+                                animationSpec = tween(300),
+                                initialOffsetX = { -it })
+                        },
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                animationSpec = tween(300),
+                                targetOffsetX = { -it })
+                        },
+                        exitTransition = { androidx.compose.animation.ExitTransition.None },
+                        popEnterTransition = { androidx.compose.animation.EnterTransition.None }
+                    ) {
+
+                        SettingsScreen(
                             theme = viewModel.themeState,
                             size = viewModel.sizeState,
-                            premium = premiumState,
-                            update = updateState,
+                            onBack = { navController.popBackStack() },
                             onClick = { click ->
                                 when (click) {
-                                    PREMIUM_CLICK -> { navController.navigate(FIRST_NAVIGATION_PREMIUM_SCREEN) }
-                                    UPGRATE_CLICK -> {viewModel.openUpdateApp()}
-                                    SETTINGS_CLICK -> { navController.navigate(FIRST_NAVIGATION_SETTINGS_SCREEN)}
-                                    SHARED_ClICK -> {
-                                        //viewModel.sendMessage("Общие дела появяться в следующих обновлениях")
-                                    }
+                                    FIRST_NAVIGATION_FAQ_SCREEN -> navController.navigate(
+                                        FIRST_NAVIGATION_FAQ_SCREEN
+                                    )
                                 }
                             },
-                            onClickCategory = { listCategory, action ->
-                                when (action) {
-                                    INSERT_DIALOG_CATEGORY -> {
-                                        if (premiumState) {
-                                            viewModel.showDialog = DialogState(INSERT_DIALOG_CATEGORY, category = listCategory)
-                                        } else viewModel.sendMessage("Категории доступны в PREMIUM версии")
-                                    }
-                                    DELETE_DIALOG_CATEGORY -> {
-                                        viewModel.showDialog = DialogState(DELETE_DIALOG_CATEGORY, category = listCategory)
-                                    }
-                                }
-                            }
+                            viewModel = viewModel,
+                            innerPadding = innerPadding
                         )
-                        if (firstStart && viewModel.getPlatform != PLATFORM_ANDROID) {
-                            SplashScreen(onAnimationDone = { viewModel.firstStart = false })
-                        }
-
-
                     }
-            } 
 
-            // ЭКРАН №2: Настройки
-            composable( 
-                route = FIRST_NAVIGATION_SETTINGS_SCREEN,
-
-                enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) },
-                popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
-                exitTransition = { androidx.compose.animation.ExitTransition.None },
-                popEnterTransition = { androidx.compose.animation.EnterTransition.None }
-            ) {
-
-                    SettingsScreen(
-                        theme = viewModel.themeState,
-                        size = viewModel.sizeState,
-                        onBack = { navController.popBackStack()},
-                        onClick = { click ->
-                            when (click) { FIRST_NAVIGATION_FAQ_SCREEN -> navController.navigate(FIRST_NAVIGATION_FAQ_SCREEN) }
+                    // ЭКРАН №3: FAQ
+                    composable(
+                        route = FIRST_NAVIGATION_FAQ_SCREEN,
+                        enterTransition = {
+                            slideInHorizontally(
+                                animationSpec = tween(300),
+                                initialOffsetX = { -it })
                         },
-                        viewModel = viewModel,
-                        innerPadding = innerPadding
-                    )
-            } 
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                animationSpec = tween(300),
+                                targetOffsetX = { -it })
+                        },
+                        exitTransition = { androidx.compose.animation.ExitTransition.None },
+                        popEnterTransition = { androidx.compose.animation.EnterTransition.None }
+                    ) {
+                        Faq(
+                            theme = theme,
+                            size = size,
+                            onBack = { navController.popBackStack() },
+                            innerPadding = innerPadding
+                        )
+                    }
 
-            // ЭКРАН №3: FAQ
-            composable( 
-                route = FIRST_NAVIGATION_FAQ_SCREEN,
-                enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) }, 
-                popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
-                exitTransition = { androidx.compose.animation.ExitTransition.None },
-                popEnterTransition = { androidx.compose.animation.EnterTransition.None }
-            ) { 
-                Faq( 
-                    theme = theme, 
-                    size = size, 
-                    onBack = { navController.popBackStack() }, 
-                    innerPadding = innerPadding 
-                ) 
-            } 
+                    // ЭКРАН №4: Премиум
+                    composable(
+                        route = FIRST_NAVIGATION_PREMIUM_SCREEN,
+                        enterTransition = {
+                            slideInHorizontally(
+                                animationSpec = tween(300),
+                                initialOffsetX = { -it })
+                        },
+                        popExitTransition = {
+                            slideOutHorizontally(
+                                animationSpec = tween(300),
+                                targetOffsetX = { -it })
+                        },
+                        exitTransition = { androidx.compose.animation.ExitTransition.None },
+                        popEnterTransition = { androidx.compose.animation.EnterTransition.None }
+                    ) {
 
-            // ЭКРАН №4: Премиум
-            composable( 
-                route = FIRST_NAVIGATION_PREMIUM_SCREEN,
-                enterTransition = { slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) }, 
-                popExitTransition = { slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it }) },
-                exitTransition = { androidx.compose.animation.ExitTransition.None },
-                popEnterTransition = { androidx.compose.animation.EnterTransition.None }
-            ) {
-
-                PremiumScreen(size = size,
-                    theme = theme,
-                    listProduct = productList,
-                    onBack = { navController.popBackStack() },
-                    onClickBuy = {productId -> viewModel.buyProduct(productId)},
-                    innerPadding = innerPadding)
-            } 
-        } 
-    } 
-}
+                        PremiumScreen(
+                            size = size,
+                            theme = theme,
+                            listProduct = productList,
+                            onBack = { navController.popBackStack() },
+                            onClickBuy = { productId -> viewModel.buyProduct(productId) },
+                            innerPadding = innerPadding
+                        )
+                    }
+                }
+            }
+        }
 
 
     }
@@ -424,7 +477,7 @@ fun StartAppContent(
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
 
-                  
+
                         Image(
                             painter = painterResource(theme.backgroundDrawer),
                             contentDescription = null,
@@ -438,8 +491,7 @@ fun StartAppContent(
                         ) {
 
                             Text(
-                                text = if(isPersonalRoute) "Категории" else "Общие дела"
-                                ,
+                                text = if (isPersonalRoute) "Категории" else "Общие дела",
                                 color = theme.textColor,
                                 fontSize = size.textMenu,
                                 fontWeight = FontWeight.Bold,
@@ -499,12 +551,12 @@ fun StartAppContent(
                                                 onClick = { },
                                                 modifier = Modifier.size(35.dp)
                                             ) {
-                                            Icon(
-                                                imageVector = theme.iconDrawerEveryday, // Или ваша иконка ic_menu
-                                                contentDescription = "Меню",
-                                                tint = theme.iconTint
-                                            )
-                                        }
+                                                Icon(
+                                                    imageVector = theme.iconDrawerEveryday, // Или ваша иконка ic_menu
+                                                    contentDescription = "Меню",
+                                                    tint = theme.iconTint
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -526,22 +578,23 @@ fun StartAppContent(
                                                 )
 
                                                 .clickable {
-                                                    val nextRoute = if (isPersonalRoute) SECOND_NAVIGATION_SHARED_ else SECOND_NAVIGATION_PERSONAL_MAIN_PAGER
-                                                    val popUpRoute = if(isPersonalRoute) SECOND_NAVIGATION_PERSONAL_MAIN_PAGER else SECOND_NAVIGATION_SHARED_
-                                                    localNavController.navigate(nextRoute){
-                                                        popUpTo(popUpRoute) { inclusive = true }
-                                                        launchSingleTop = true
-                                                    }
-                                                    //onClick(SHARED_ClICK)
-                                                    onPersonalModel(!isPersonalRoute)
+
+//                                                    val nextRoute = if (isPersonalRoute) SECOND_NAVIGATION_SHARED_ else SECOND_NAVIGATION_PERSONAL_MAIN_PAGER
+//                                                    val popUpRoute = if(isPersonalRoute) SECOND_NAVIGATION_PERSONAL_MAIN_PAGER else SECOND_NAVIGATION_SHARED_
+//                                                    localNavController.navigate(nextRoute){
+//                                                        popUpTo(popUpRoute) { inclusive = true }
+//                                                        launchSingleTop = true
+//                                                    }
+//                                                    onPersonalModel(!isPersonalRoute)
+                                                    onClick(SHARED_ClICK)
                                                 },
                                             shape = RoundedCornerShape(10.dp),
-                                            
+
                                             colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
                                         ) {
                                             Text(
                                                 modifier = Modifier.padding(8.dp),
-                                                text = if(isPersonalRoute) "Общие дела" else "Личные дела",
+                                                text = if (isPersonalRoute) "Общие дела" else "Личные дела",
                                                 color = theme.textColor,
                                                 lineHeight = size.lineHeightItem,
                                                 fontSize = size.textItem
@@ -552,86 +605,84 @@ fun StartAppContent(
                                             modifier = Modifier.size(35.dp)
                                         ) {
                                             Icon(
-                                                imageVector = if(isPersonalRoute) theme.iconDrawerShare else theme.iconDrawerEveryday,
+                                                imageVector = if (isPersonalRoute) theme.iconDrawerShare else theme.iconDrawerEveryday,
                                                 contentDescription = "Поделиться",
                                                 tint = theme.iconTint
                                             )
                                         }
                                     }
                                 }
-                                    if(isPersonalRoute)
-                                    {
-                                        items(
-                                            items = categories,
-                                            key = { it.id!! }
-                                        ) { category ->
-                                            Row(
+                                if (isPersonalRoute) {
+                                    items(
+                                        items = categories,
+                                        key = { it.id!! }
+                                    ) { category ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Card(
                                                 modifier = Modifier
-                                                    .fillMaxWidth(),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Card(
-                                                    modifier = Modifier
-                                                        .weight(1f)
-                                                        .border(
-                                                            3.dp,
-                                                            theme.borderCardMenuItem,
-                                                            RoundedCornerShape(10.dp)
-                                                        )
-                                                        // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
-                                                        .combinedClickable(
-                                                            onClick = {
-                                                                scope.launch {
-                                                                    launch { drawerState.close() }
-                                                                    launch {
-                                                                        pagerState.animateScrollToPage(
-                                                                            1
-                                                                        )
-                                                                    }
+                                                    .weight(1f)
+                                                    .border(
+                                                        3.dp,
+                                                        theme.borderCardMenuItem,
+                                                        RoundedCornerShape(10.dp)
+                                                    )
+                                                    // 3. Добавляем клик (эффект волны подстроится под форму автоматически)
+                                                    .combinedClickable(
+                                                        onClick = {
+                                                            scope.launch {
+                                                                launch { drawerState.close() }
+                                                                launch {
+                                                                    pagerState.animateScrollToPage(
+                                                                        1
+                                                                    )
                                                                 }
-                                                                updateCategory(category.name)
-                                                            },
-                                                            onLongClick = {
-                                                                onClickCategory(
-                                                                    category,
-                                                                    INSERT_DIALOG_CATEGORY
-                                                                )
                                                             }
-                                                        ),
-                                                    shape = RoundedCornerShape(10.dp),
+                                                            updateCategory(category.name)
+                                                        },
+                                                        onLongClick = {
+                                                            onClickCategory(
+                                                                category,
+                                                                INSERT_DIALOG_CATEGORY
+                                                            )
+                                                        }
+                                                    ),
+                                                shape = RoundedCornerShape(10.dp),
 
-                                                    colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
-                                                ) {
-                                                    Text(
-                                                        modifier = Modifier.padding(8.dp),
-                                                        text = category.name,
-                                                        color = theme.textColor,
-                                                        lineHeight = size.lineHeightItem,
-                                                        fontSize = size.textItem
+                                                colors = CardDefaults.cardColors(containerColor = theme.cardMenuItem)
+                                            ) {
+                                                Text(
+                                                    modifier = Modifier.padding(8.dp),
+                                                    text = category.name,
+                                                    color = theme.textColor,
+                                                    lineHeight = size.lineHeightItem,
+                                                    fontSize = size.textItem
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = {
+                                                    onClickCategory(
+                                                        category,
+                                                        DELETE_DIALOG_CATEGORY
                                                     )
-                                                }
-                                                IconButton(
-                                                    onClick = {
-                                                        onClickCategory(
-                                                            category,
-                                                            DELETE_DIALOG_CATEGORY
-                                                        )
-                                                    },
-                                                    modifier = Modifier.size(35.dp)
-                                                ) {
-                                                    Icon(
-                                                        modifier = Modifier.fillMaxSize(),
-                                                        imageVector = theme.iconDelItem,
-                                                        contentDescription = "Удалить",
-                                                        tint = theme.iconDelTint
-                                                    )
-                                                }
+                                                },
+                                                modifier = Modifier.size(35.dp)
+                                            ) {
+                                                Icon(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    imageVector = theme.iconDelItem,
+                                                    contentDescription = "Удалить",
+                                                    tint = theme.iconDelTint
+                                                )
                                             }
                                         }
                                     }
-                                else {
-                                        item { Text("Временный элемент") }
-                                    }
+                                } else {
+                                    item { Text("Временный элемент") }
+                                }
 
                             }
 
@@ -647,7 +698,7 @@ fun StartAppContent(
                                         .size(50.dp)
                                         .align(Alignment.CenterEnd),
                                     onClick = {
-                                        if(premium) onClickCategory(null, INSERT_DIALOG_CATEGORY)
+                                        if (premium) onClickCategory(null, INSERT_DIALOG_CATEGORY)
                                         else toastEvents("Доступно в PREMIUM версии")
 
                                     }
@@ -716,9 +767,7 @@ fun StartAppContent(
                                         color = theme.textColor,
                                         fontSize = size.drawerBottomMenuText,
                                         modifier = Modifier
-                                            .fillMaxWidth().padding(start = 4.dp)
-
-                                        ,
+                                            .fillMaxWidth().padding(start = 4.dp),
                                         fontWeight = FontWeight.Bold
 
                                     )
@@ -744,8 +793,7 @@ fun StartAppContent(
                                         color = theme.textColor,
                                         fontSize = size.drawerBottomMenuText,
                                         modifier = Modifier
-                                            .fillMaxWidth().padding(start = 4.dp)
-                                        ,
+                                            .fillMaxWidth().padding(start = 4.dp),
                                         fontWeight = FontWeight.Bold
 
                                     )
@@ -770,7 +818,7 @@ fun StartAppContent(
 
                 NavHost(
                     navController = localNavController,
-                    startDestination = if(isPersonalRoute)SECOND_NAVIGATION_PERSONAL_MAIN_PAGER else SECOND_NAVIGATION_SHARED_,
+                    startDestination = if (isPersonalRoute) SECOND_NAVIGATION_PERSONAL_MAIN_PAGER else SECOND_NAVIGATION_SHARED_,
 
                     ) {
 

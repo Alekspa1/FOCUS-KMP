@@ -46,7 +46,8 @@ fun ListToDo(
     onAddItem: () -> Unit = {},
     onDragDropped: (List<Item>) -> Unit = {}, // Возвращает чистый List<Item> во ViewModel
     onSubDragDropped: (List<SubItem>) -> Unit = {},
-    category: String = "Тест"
+    category: String = "Тест",
+    onVoiceIntent : () -> Unit = {}
 ) {
     val listState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
@@ -150,7 +151,7 @@ fun ListToDo(
 
                     IconButton(
                         modifier = Modifier.size(50.dp).align(Alignment.Center),
-                        onClick = {  },
+                        onClick = { onVoiceIntent() },
                     ) {
                         Icon(
                             imageVector = theme.iconMicro,

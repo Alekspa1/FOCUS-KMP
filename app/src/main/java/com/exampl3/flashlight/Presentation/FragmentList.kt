@@ -124,20 +124,8 @@ open class FragmentList : Fragment() {
         val launcher =
             registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 if (it.resultCode == Activity.RESULT_OK) {
-                   // modelFlashLight.getItemMaxSort()
                     val text = it.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
                     if (text != null) {
-                      //  modelFlashLight.getItemMaxSort()
-                        // modelFlashLight.insertItem(
-                        //     Item(
-                        //         null,
-                        //         text[0],
-                        //         category = modelFlashLight.categoryItemLD.value!!,
-                        //         sort = modelFlashLight.maxSorted.value ?: 0,
-                        //         alarmTime = 0,
-                        //     )
-                        // )
-
                         modelFlashLight.insertItem(       
                     name = text[0], // Текст из голосового ввода
                     

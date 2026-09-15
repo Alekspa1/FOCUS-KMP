@@ -17,6 +17,7 @@ import data.repostitory.AndroidPermissionImpl
 import data.repostitory.AndroidSaveDeleteImpl
 import data.repostitory.AndroidPlatformFilePickerImpl
 import data.repostitory.AndroidSoundPlayer
+import data.repostitory.AndroidVoiceIntentImpl
 import data.room.myDataBase
 import domain.repostirory.AlarmRepository
 import domain.repostirory.GetPlatrormRepository
@@ -25,6 +26,7 @@ import domain.repostirory.PaySdkRepository
 import domain.repostirory.PermissionRepository
 import domain.repostirory.SaveDeleteImageRepositpry
 import domain.repostirory.PickerRepository
+import domain.repostirory.VoiceIntentRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.bind
@@ -89,4 +91,6 @@ actual val moduleAnotherPlatform = module {
     factory<AndroidSoundPlayer> { AndroidSoundPlayer(get()) }
     factory<PaySdkRepository> { AndroidPaySdkImpl (get(),get()) }
     single { AndroidPlatformFilePickerImpl() } bind PickerRepository::class
+
+    single { AndroidVoiceIntentImpl() } bind VoiceIntentRepository::class
 }

@@ -39,10 +39,11 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-import io.ktor.client.network.sockets.SocketTimeoutException 
+import io.ktor.client.network.sockets.SocketTimeoutException
 import domain.repostirory.TelegramSyncServiceRepository
 import data.perository.TelegramSyncServiceImpl
 import domain.repostirory.BackupManagerRepository
+import domain.repostirory.VoiceIntentRepository
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 
@@ -50,7 +51,7 @@ expect val moduleAnotherPlatform: Module
 
 val appModule = module {
     //viewModelOf(::MainViewModel)
-     singleOf(::MainViewModel)
+    singleOf(::MainViewModel)
 
     single<myDataBase> {
 
@@ -62,12 +63,12 @@ val appModule = module {
             .build()
     }
 
-     single<HttpClient> {
+    single<HttpClient> {
         HttpClient {
             // 💥 САМОЕ ГЛАВНОЕ ДОБАВЛЕНИЕ ДЛЯ РЕАЛТАЙМА:
             install(HttpTimeout) {
                 // Время, в течение которого Ктор готов ждать ответ от сервера (45 секунд)
-                requestTimeoutMillis = 45_000 
+                requestTimeoutMillis = 45_000
                 connectTimeoutMillis = 15_000
                 socketTimeoutMillis = 45_000
             }
@@ -75,11 +76,11 @@ val appModule = module {
             install(HttpRequestRetry) {
                 maxRetries = 3
                 exponentialDelay()
-                
+
                 retryIf { request, response ->
                     response.status.value in 500..599
                 }
-                
+
                 retryOnExceptionIf { request, cause ->
                     // Таймауты сети пускай пробрасываются в catch, 
                     // чтобы наш бесконечный цикл сам перезапускал Long Polling!
@@ -88,7 +89,8 @@ val appModule = module {
             }
 
             install(Logging) {
-                level = LogLevel.BODY // На этапе теста BODY — супер, в логах будет виден весь JSON от ТГ
+                level =
+                    LogLevel.BODY // На этапе теста BODY — супер, в логах будет виден весь JSON от ТГ
             }
 
             install(ContentNegotiation) {
@@ -102,26 +104,32 @@ val appModule = module {
     }
     single { get<myDataBase>().CourseDao() }
 
-    single<SharedPrefRepository> { MultiplatrormSettings(settings = get(named("noteBook")), platform = get()) }
-    single<SettingsAppRepository > { MultiplatrormAppSettings(settings = get(named("settings"))) }
-    
-    single<AlarmRepeadRepository> { AlarmRepeadImp(get(),get()) }
-    factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
-    single<TelegramSyncServiceRepository>{TelegramSyncServiceImpl(get()) }
+    single<SharedPrefRepository> {
+        MultiplatrormSettings(
+            settings = get(named("noteBook")),
+            platform = get()
+        )
+    }
+    single<SettingsAppRepository> { MultiplatrormAppSettings(settings = get(named("settings"))) }
 
-    single<BackupManagerRepository> { BackupManagerImpl(
-        get(),
-        get(),
-        get(),
-        get(),
-        alarm = get()
-    )
+    single<AlarmRepeadRepository> { AlarmRepeadImp(get(), get()) }
+    factory<SaveDeleteImageRepositpry> { SaveDeleteImageImpl(get()) }
+    single<TelegramSyncServiceRepository> { TelegramSyncServiceImpl(get()) }
+
+    single<BackupManagerRepository> {
+        BackupManagerImpl(
+            get(),
+            get(),
+            get(),
+            get(),
+            alarm = get()
+        )
     }
 
+
+
+
 }
-
-
-
 
 
 fun initKoin(config: KoinAppDeclaration? = null) {

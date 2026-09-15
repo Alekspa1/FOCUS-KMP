@@ -8,6 +8,7 @@ import CommonConst.DELETE_DIALOG_ITEM
 import CommonConst.IMAGE
 import CommonConst.INSERT_DIALOG_ITEM
 import CommonConst.NOTIFICATION
+import CommonConst.TODO
 import MainViewModel
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -329,7 +330,10 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                                }
                               
                            } ,
-                        onAddItem = {viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM)})
+                        onAddItem = {viewModel.showDialog = DialogState(INSERT_DIALOG_ITEM)},
+                       onVoiceIntent = { viewModel.openVoice(TODO) }
+                   )
+
                 }
                 2 -> {
 if (premium.value) {
