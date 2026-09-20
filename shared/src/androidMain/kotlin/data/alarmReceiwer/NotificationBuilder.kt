@@ -127,12 +127,21 @@ class NotificationBuilder(
             action = Intent.ACTION_VIEW 
             putExtra("TASK_ID", item.id)
             }
+         val intentOpenActivity = Intent(context, MainActivity::class.java).apply {
+             action = Intent.ACTION_VIEW
+         }
 
         val contentIntent =
             PendingIntent.getActivity(
                 context, item.id, intentPush,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
+
+         val fullScreenIntent =
+             PendingIntent.getActivity(
+                 context, item.id, intentOpenActivity,
+                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+             )
 
             val fullPath = image.getUri(item.uri).removePrefix("file://")
 
@@ -159,7 +168,7 @@ class NotificationBuilder(
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setStyle(bigIcon)
             .setContentIntent(contentIntent)
-            .setFullScreenIntent(contentIntent, true)
+            .setFullScreenIntent(fullScreenIntent, true)
             .addAction(0, "Готово", canselIntent)
             .addAction(0, "Отложить", postponeIntent)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
