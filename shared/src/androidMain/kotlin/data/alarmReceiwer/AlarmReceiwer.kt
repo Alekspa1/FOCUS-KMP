@@ -48,28 +48,25 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
 
     override fun onReceive(context: Context, intent: Intent) {
 
-        calendarZero = Calendar.getInstance()
 
+
+        if (intent.action == KEY_INTENT_ALARM) {
+            val serviceIntent = Intent(context, MyService::class.java).apply {
+                action = intent.action
+                putExtras(intent)
+            }
+            ContextCompat.startForegroundService(
+                context,
+                serviceIntent
+            )
+            return
+        } // приход будильника
+        calendarZero = Calendar.getInstance()
         val pendingResult = goAsync()
 
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             try {
                 when (intent.action) {
-                    KEY_INTENT_ALARM -> {
-
-                        val serviceIntent = Intent(context, MyService::class.java).apply {
-                            action = intent.action
-                            putExtras(intent)
-                        }
-                        withContext(Dispatchers.Main) {
-                            ContextCompat.startForegroundService(
-                                context,
-                                serviceIntent
-                            )
-                        }
-
-                    } // приход будильника
-
                     KEY_INTENT_CALL_BACKREADY -> {
                         val item = getItemFromIntent(intent, KEY_INTENT_CALL_BACKREADY)
                         withContext(Dispatchers.Main) {
