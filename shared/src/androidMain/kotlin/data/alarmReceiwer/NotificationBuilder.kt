@@ -13,6 +13,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.net.Uri
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.exampl3.flashlight.R
@@ -39,8 +40,22 @@ class NotificationBuilder(
         AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
 
 
+
+    // 2. Создаем незаметную заглушку
+    fun createInitialStubNotification(): Notification {
+        return NotificationCompat.Builder(context, newRingtoneUri.toString())
+            .setSmallIcon(R.drawable.icon)
+            .setContentTitle("Запуск уведомления...")
+            .setContentText("")
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .build()
+    }
+
+
     fun input(item: Item){
         alarmPush().notify(item.id, notificationBuilder(item))
+
     }
 
     fun alarmPush(): NotificationManager {
@@ -81,7 +96,9 @@ class NotificationBuilder(
     }
     }
 
-    private fun notificationBuilder(item: Item): Notification {
+
+
+     fun notificationBuilder(item: Item): Notification {
 
         val intentCancel = Intent(context, AlarmReceiwer::class.java)
         intentCancel.setAction(KEY_INTENT_CALL_BACKREADY)
@@ -127,12 +144,7 @@ class NotificationBuilder(
                 } catch (_: Exception) {
                 null
                 }
-            
-        // val bitmap:Bitmap? = try {
-        //     MediaStore.Images.Media.getBitmap(context.contentResolver, image.getUri(item.uri).toUri())
-        // } catch (_: Exception){
-        //     null
-        // }
+
         val bigIcon = NotificationCompat.BigPictureStyle()
             .bigPicture(bitmap)
 
@@ -148,7 +160,6 @@ class NotificationBuilder(
             .setContentIntent(contentIntent)
             .addAction(0, "Готово", canselIntent)
             .addAction(0, "Отложить", postponeIntent)
-            .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
 
 
