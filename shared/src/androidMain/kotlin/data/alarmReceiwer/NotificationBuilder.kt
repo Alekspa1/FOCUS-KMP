@@ -3,6 +3,7 @@ package data.alarmReceiwer
 import CommonConst.CHANNEL_ID
 import CommonConst.KEY_INTENT_CALL_BACKREADY
 import CommonConst.KEY_INTENT_CALL_POSTPONE
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -98,6 +99,7 @@ class NotificationBuilder(
 
 
 
+     @SuppressLint("LaunchActivityFromNotification", "FullScreenIntentPolicy")
      fun notificationBuilder(item: Item): Notification {
 
         val intentCancel = Intent(context, AlarmReceiwer::class.java)
@@ -122,9 +124,8 @@ class NotificationBuilder(
 
 
         val intentPush = Intent(context, MainActivity::class.java).apply {
-            // Добавляем флаги, чтобы не плодить окна и передать данные
             action = Intent.ACTION_VIEW 
-            putExtra("TASK_ID", item.id) // Ключ для извлечения
+            putExtra("TASK_ID", item.id)
             }
 
         val contentIntent =
@@ -158,6 +159,7 @@ class NotificationBuilder(
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setStyle(bigIcon)
             .setContentIntent(contentIntent)
+            .setFullScreenIntent(contentIntent, true)
             .addAction(0, "Готово", canselIntent)
             .addAction(0, "Отложить", postponeIntent)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
