@@ -29,7 +29,6 @@ class AndroidAlarmImpl( private val context: Context,
         }
 
         val clockInfo = AlarmManager.AlarmClockInfo(item.alarmTime, alarmtIntent)
-
         // 2. Устанавливаем ультимативный точный будильник
         alarmManager.setAlarmClock(clockInfo, alarmtIntent)
     }

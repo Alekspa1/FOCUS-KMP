@@ -49,7 +49,6 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
     override fun onReceive(context: Context, intent: Intent) {
 
 
-
         if (intent.action == KEY_INTENT_ALARM) {
             val serviceIntent = Intent(context, MyService::class.java).apply {
                 action = intent.action

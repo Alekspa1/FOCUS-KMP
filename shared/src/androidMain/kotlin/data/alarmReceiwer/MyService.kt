@@ -44,27 +44,30 @@ class MyService : Service(), KoinComponent {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         calendarZero = Calendar.getInstance()
-
         if (intent == null) {
             stopSelf(startId)
             return START_NOT_STICKY
         }
         notificationBuilder.alarmPush()
+        val rawId = intent.getIntExtra(KEY_INTENT, 0)
+        val notifyId = if (rawId > 0) rawId else rawId * -1
+        val item = Item(id = notifyId, name = "Запуск уведомления...")
 
-            startForeground(
-                Int.MAX_VALUE,
-                notificationBuilder.createInitialStubNotification()
-            )
+        startForeground(
+            item.id,
+            notificationBuilder.notificationBuilder(item)
+        )
+
+//            startForeground(
+//                Int.MAX_VALUE,
+//                notificationBuilder.createInitialStubNotification()
+//            )
 
         serviceScope.launch {
-
-            if (intent.action == KEY_INTENT_ALARM) {
                     val item = getItemFromIntent(intent, KEY_INTENT)
-                    startNotification(startId,item)
+                     startNotification(startId,item)
                     if (item.interval != ALARM_REPEAT) processingAlarm(item, "")
 
-
-            }
         }
 
 
@@ -94,9 +97,19 @@ class MyService : Service(), KoinComponent {
 
     private suspend fun startNotification(startId: Int, item: Item) {
         withContext(Dispatchers.Main) {
-            notificationBuilder.input(item)
-            stopForeground(STOP_FOREGROUND_REMOVE)
+
+            startForeground(
+                item.id,
+                notificationBuilder.notificationBuilder(item)
+            )
+
+            stopForeground(STOP_FOREGROUND_DETACH)  // снимает foreground-статус, но оставляет уведомление
             stopSelf(startId)
+            //notificationBuilder.input(item)
+            //stopForeground(STOP_FOREGROUND_REMOVE)
+            //stopSelf(startId)
+
+
         }
     }
 

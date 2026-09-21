@@ -1,6 +1,7 @@
 package data.alarmReceiwer
 
 import CommonConst.CHANNEL_ID
+import CommonConst.CHANNEL_ID_PASSED
 import CommonConst.KEY_INTENT_CALL_BACKREADY
 import CommonConst.KEY_INTENT_CALL_POSTPONE
 import android.annotation.SuppressLint
@@ -42,13 +43,13 @@ class NotificationBuilder(
 
 
 
-    // 2. Создаем незаметную заглушку
+
     fun createInitialStubNotification(): Notification {
-        return NotificationCompat.Builder(context, newRingtoneUri.toString())
+        return NotificationCompat.Builder(context, Int.MAX_VALUE.toString())
             .setSmallIcon(R.drawable.icon)
             .setContentTitle("Запуск уведомления...")
             .setContentText("")
-            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .build()
     }
@@ -63,6 +64,10 @@ class NotificationBuilder(
         if (notificationManager.getNotificationChannel(CHANNEL_ID) != null) {
             notificationManager.deleteNotificationChannel(CHANNEL_ID)
         }
+
+//        if(notificationManager.getNotificationChannel(Int.MAX_VALUE.toString()) == null){
+//           notificationManager.createNotificationChannel(createCnanellStub())
+//        }
 
         if (newRingtoneUri != oldRingtoneUri) {
 
@@ -97,9 +102,17 @@ class NotificationBuilder(
     }
     }
 
+    private fun createCnanellStub() : NotificationChannel{
+
+        return NotificationChannel(
+            Int.MAX_VALUE.toString(),
+            "Заглушка", NotificationManager.IMPORTANCE_HIGH
+        )
+    }
 
 
-     @SuppressLint("LaunchActivityFromNotification", "FullScreenIntentPolicy")
+
+
      fun notificationBuilder(item: Item): Notification {
 
         val intentCancel = Intent(context, AlarmReceiwer::class.java)

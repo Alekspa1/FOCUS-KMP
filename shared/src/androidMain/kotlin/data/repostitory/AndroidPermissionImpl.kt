@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,9 +28,11 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
     private var deferredPermission : CompletableDeferred<Boolean>? = null
 
     override fun isChekedPermission(permissionName: String) : Boolean{
+
    return when(permissionName){
     NOTIFICATION->  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS)
+
     } else {
         true
     }
@@ -53,13 +56,19 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
 
   
     override suspend fun requestPermission(permissionName: String) : Boolean{
+        if (isChekedPermission(permissionName)) {
+            return true
+        }
         val reservDeferred = CompletableDeferred<Boolean>()
         deferredPermission = reservDeferred
     when(permissionName){
         NOTIFICATION ->{
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 pLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
+            }  else {
+                return true
+
+                        }
         }
         ALARM_SETTINGS -> {
             val permissionsToRequest =
@@ -83,20 +92,61 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
             return true // Сразу возвращаем true, чтобы разблокировать корутину во ViewModel
         }
 
-        "APP_SETTINGS" -> {
-            try {
-                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = Uri.fromParts("package", context.packageName, null)
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                context.startActivity(intent)
-            } catch (e: Exception) {
-                return false
-            }
-            return true
-        }
-        else -> {
+        APP_SETTINGS -> {
+            val manufacturer = android.os.Build.MANUFACTURER.lowercase()
 
+            return try {
+                val intent = when {
+                    manufacturer.contains("huawei") -> {
+                        Intent("com.huawei.android.launcher.permission.CHANGE_AUTO_START").apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                    }
+                    manufacturer.contains("xiaomi") || manufacturer.contains("redmi") || manufacturer.contains("poco") -> {
+                        Intent().apply {
+                            putExtra("package_name", context.packageName)
+
+                            val appInfo = context.applicationInfo
+                            val label = if (appInfo.labelRes != 0) {
+                                context.getString(appInfo.labelRes)
+                            } else {
+                                appInfo.nonLocalizedLabel.toString()
+                            }
+                            putExtra("package_label", label)
+
+                            action = "miui.intent.action.APP_PERM_AUTO_START"
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                    }
+                    manufacturer.contains("oppo") || manufacturer.contains("vivo") || manufacturer.contains("realme") -> {
+                        Intent().apply {
+                            action = "oppo.intent.action.OPPO_SAFE_GUARD_PERMISSION"
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                    }
+                    else -> {
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", context.packageName, null)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                    }
+                }
+
+                context.startActivity(intent)
+                true
+            } catch (e: Exception) {
+                // Fallback на общие настройки, если специфичный Intent не найден
+                try {
+                    val fallback = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", context.packageName, null)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(fallback)
+                    true
+                } catch (ex: Exception) {
+                    false
+                }
+            }
         }
     }
         return deferredPermission?.await() ?: true
@@ -131,7 +181,7 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
         pLauncher?.unregister()
         pLauncher = null
         deferredPermission?.apply {
-            if (isActive) cancel() // Отменяем ожидание корутины, если Activity уничтожена
+            if (isActive) cancel()
         }
         deferredPermission = null
     }
