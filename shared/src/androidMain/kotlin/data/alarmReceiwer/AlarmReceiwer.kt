@@ -1,5 +1,6 @@
 package data.alarmReceiwer
 
+
 import CommonConst.ALARM_ONE
 import CommonConst.ALARM_REPEAT
 import CommonConst.KEY_INTENT
@@ -69,14 +70,16 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
                 when (intent.action) {
                     KEY_INTENT_CALL_BACKREADY -> {
                         val item = getItemFromIntent(intent, KEY_INTENT_CALL_BACKREADY)
-                        withContext(Dispatchers.Main) {
-                            notificationBuilder.alarmPush().cancel(item.id)
-                        }
+
                         when (item.interval) {
                             ALARM_ONE -> {
                                 db.updateItem(item.copy(change = true, changeAlarm = false))
                             }
                         }
+                        withContext(Dispatchers.Main) {
+                            notificationBuilder.alarmPush().cancel(item.id)
+                        }
+
 
 
                     } // Когда нажал кнопку готово
@@ -85,9 +88,6 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
 
                         val time = calendarZero.timeInMillis + TEN_MINUTES
                         val item = getItemFromIntent(intent, KEY_INTENT_CALL_POSTPONE)
-                        withContext(Dispatchers.Main) {
-                            notificationBuilder.alarmPush().cancel(item.id)
-                        }
                         when (item.interval) {
                             ALARM_ONE -> {
                                 val newItem = item.copy(changeAlarm = true, alarmTime = time)
@@ -106,6 +106,7 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
                             }
                         }
                         withContext(Dispatchers.Main) {
+                            notificationBuilder.alarmPush().cancel(item.id)
                             Toast.makeText(
                                 context.applicationContext,
                                 "Отложено на 10 минут",

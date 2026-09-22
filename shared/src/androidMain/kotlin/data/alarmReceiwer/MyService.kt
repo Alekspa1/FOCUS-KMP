@@ -21,8 +21,10 @@ import domain.repostirory.AlarmRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.descriptors.PrimitiveKind
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import java.util.Calendar
@@ -50,16 +52,8 @@ class MyService : Service(), KoinComponent {
             stopSelf(startId)
             return START_NOT_STICKY
         }
+
         notificationBuilder.alarmPush()
-        val rawId = intent.getIntExtra(KEY_INTENT, 0)
-        val notifyId = if (rawId > 0) rawId else rawId * -1
-        val item = Item(id = notifyId, name = "Запуск уведомления...")
-
-//        startForeground(
-//            item.id,
-//            notificationBuilder.notificationBuilder(item)
-//        )
-
         startForeground(
             Int.MAX_VALUE,
             notificationBuilder.createInitialStubNotification()
@@ -100,26 +94,8 @@ class MyService : Service(), KoinComponent {
 
     private suspend fun startNotification(startId: Int, item: Item) {
         withContext(Dispatchers.Main) {
-
-
             notificationBuilder.input(item)
-            stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf(startId)
-
-//            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
-//                stopForeground(STOP_FOREGROUND_DETACH)
-//                val currentNotification = notificationBuilder.notificationBuilder(item)
-//                currentNotification.flags =
-//                    currentNotification.flags and Notification.FLAG_INSISTENT.inv()
-//                notificationBuilder.alarmPush().notify(item.id, currentNotification)
-//
-//            } else {
-//
-//            }
-//
-//           // stopSelf(startId)
-
-
         }
     }
 

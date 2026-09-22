@@ -45,13 +45,23 @@ class NotificationBuilder(
 
 
 
+//    fun createInitialStubNotification(): Notification {
+//        return NotificationCompat.Builder(context, Int.MAX_VALUE.toString())
+//            .setSmallIcon(R.drawable.icon)
+//            .setContentTitle("Запуск уведомления...")
+//            .setContentText("Уведомления активны")
+//            .setPriority(NotificationCompat.PRIORITY_MAX)
+//            .setCategory(NotificationCompat.CATEGORY_ALARM)
+//            .build()
+//    }
+
     fun createInitialStubNotification(): Notification {
         return NotificationCompat.Builder(context, Int.MAX_VALUE.toString())
             .setSmallIcon(R.drawable.icon)
-            .setContentTitle("Запуск уведомления...")
-            .setContentText("")
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setContentTitle("Служба будильников")
+            .setContentText("Уведомления активны")
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .build()
     }
 
@@ -108,7 +118,8 @@ class NotificationBuilder(
 
         return NotificationChannel(
             Int.MAX_VALUE.toString(),
-            "Заглушка", NotificationManager.IMPORTANCE_HIGH
+            //"Заглушка", NotificationManager.IMPORTANCE_HIGH
+            "Заглушка", NotificationManager.IMPORTANCE_LOW
         )
     }
 
@@ -185,7 +196,7 @@ class NotificationBuilder(
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setStyle(bigIcon)
             .setContentIntent(contentIntent)
-            //.setFullScreenIntent(fullScreenIntent, true)
+            .setFullScreenIntent(fullScreenIntent, true)
             .addAction(0, "Готово", canselIntent)
             .addAction(0, "Отложить", postponeIntent)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
