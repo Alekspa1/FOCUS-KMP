@@ -774,7 +774,7 @@ fun StartAppContent(
                                         tint = if (update) theme.tintPremiumOn else theme.iconTint
                                     )
                                     Text(
-                                        text = if (update) "Вышло обновление" else "Обновлений нет", // Отвечает tvNewPremium
+                                        text = if (update) "Вышло обновление" else "Оставить отзыв", // Отвечает tvNewPremium
                                         color = theme.textColor,
                                         fontSize = size.drawerBottomMenuText,
                                         modifier = Modifier

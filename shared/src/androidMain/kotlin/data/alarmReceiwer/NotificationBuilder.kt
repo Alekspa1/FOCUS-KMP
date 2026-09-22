@@ -44,17 +44,6 @@ class NotificationBuilder(
         AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
 
 
-
-//    fun createInitialStubNotification(): Notification {
-//        return NotificationCompat.Builder(context, Int.MAX_VALUE.toString())
-//            .setSmallIcon(R.drawable.icon)
-//            .setContentTitle("Запуск уведомления...")
-//            .setContentText("Уведомления активны")
-//            .setPriority(NotificationCompat.PRIORITY_MAX)
-//            .setCategory(NotificationCompat.CATEGORY_ALARM)
-//            .build()
-//    }
-
     fun createInitialStubNotification(): Notification {
         return NotificationCompat.Builder(context, Int.MAX_VALUE.toString())
             .setSmallIcon(R.drawable.icon)

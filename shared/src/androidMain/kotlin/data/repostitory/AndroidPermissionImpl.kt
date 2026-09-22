@@ -94,54 +94,112 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
 
         APP_SETTINGS -> {
             val manufacturer = android.os.Build.MANUFACTURER.lowercase()
+            val packageName = context.packageName
 
-            return try {
-                val intent = when {
-                    manufacturer.contains("huawei") -> {
-                        Intent("com.huawei.android.launcher.permission.CHANGE_AUTO_START").apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                    }
-                    manufacturer.contains("xiaomi") || manufacturer.contains("redmi") || manufacturer.contains("poco") -> {
-                        Intent().apply {
-                            putExtra("package_name", context.packageName)
+            fun fallbackIntent(): Intent {
+                return Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", packageName, null)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            }
 
-                            val appInfo = context.applicationInfo
-                            val label = if (appInfo.labelRes != 0) {
-                                context.getString(appInfo.labelRes)
-                            } else {
-                                appInfo.nonLocalizedLabel.toString()
-                            }
-                            putExtra("package_label", label)
-
-                            action = "miui.intent.action.APP_PERM_AUTO_START"
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            fun tryStart(candidates: List<Intent>): Boolean {
+                for (intent in candidates) {
+                    try {
+                        if (intent.resolveActivity(context.packageManager) != null) {
+                            context.startActivity(intent)
+                            return true
                         }
-                    }
-                    manufacturer.contains("oppo") || manufacturer.contains("vivo") || manufacturer.contains("realme") -> {
-                        Intent().apply {
-                            action = "oppo.intent.action.OPPO_SAFE_GUARD_PERMISSION"
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                    }
-                    else -> {
-                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.fromParts("package", context.packageName, null)
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
+                    } catch (_: Exception) {
+                        // пробуем следующий
                     }
                 }
+                return false
+            }
 
-                context.startActivity(intent)
-                true
-            } catch (e: Exception) {
-                // Fallback на общие настройки, если специфичный Intent не найден
-                try {
-                    val fallback = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", context.packageName, null)
+            val candidates: List<Intent> = when {
+                manufacturer.contains("huawei") || manufacturer.contains("honor") -> listOf(
+                    Intent().apply {
+                        component = android.content.ComponentName(
+                            "com.huawei.systemmanager",
+                            "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
+                        )
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    },
+                    Intent().apply {
+                        component = android.content.ComponentName(
+                            "com.huawei.systemmanager",
+                            "com.huawei.systemmanager.optimize.process.ProtectActivity"
+                        )
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
-                    context.startActivity(fallback)
+                )
+
+                manufacturer.contains("xiaomi") || manufacturer.contains("redmi") || manufacturer.contains("poco") -> listOf(
+                    Intent().apply {
+                        component = android.content.ComponentName(
+                            "com.miui.securitycenter",
+                            "com.miui.permcenter.autostart.AutoStartManagementActivity"
+                        )
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                )
+
+                manufacturer.contains("oppo") || manufacturer.contains("realme") -> listOf(
+                    Intent().apply {
+                        component = android.content.ComponentName(
+                            "com.coloros.safecenter",
+                            "com.coloros.safecenter.startupapp.StartupAppListActivity"
+                        )
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    },
+                    Intent().apply {
+                        component = android.content.ComponentName(
+                            "com.oppo.safe",
+                            "com.oppo.safe.permission.startup.StartupAppListActivity"
+                        )
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                )
+
+                manufacturer.contains("vivo") -> listOf(
+                    Intent().apply {
+                        component = android.content.ComponentName(
+                            "com.vivo.permissionmanager",
+                            "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
+                        )
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    },
+                    Intent().apply {
+                        component = android.content.ComponentName(
+                            "com.iqoo.secure",
+                            "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"
+                        )
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                )
+
+                manufacturer.contains("samsung") -> listOf(
+                    Intent().apply {
+                        component = android.content.ComponentName(
+                            "com.samsung.android.lool",
+                            "com.samsung.android.sm.ui.battery.BatteryActivity"
+                        )
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                )
+
+                else -> listOf(fallbackIntent())
+            }
+
+            try {
+                if (!tryStart(candidates)) {
+                    context.startActivity(fallbackIntent())
+                }
+                true
+            } catch (e: Exception) {
+                try {
+                    context.startActivity(fallbackIntent())
                     true
                 } catch (ex: Exception) {
                     false
