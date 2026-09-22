@@ -8,8 +8,10 @@ import CommonConst.KEY_INTENT_CALL_BACKREADY
 import CommonConst.KEY_INTENT_CALL_POSTPONE
 import CommonConst.REBOOT
 import CommonConst.TEN_MINUTES
+import android.app.Notification
 import android.app.Service
 import android.content.Intent
+import android.os.Build
 import android.os.IBinder
 import android.widget.Toast
 import data.room.CourseDao
@@ -53,21 +55,20 @@ class MyService : Service(), KoinComponent {
         val notifyId = if (rawId > 0) rawId else rawId * -1
         val item = Item(id = notifyId, name = "Запуск уведомления...")
 
+//        startForeground(
+//            item.id,
+//            notificationBuilder.notificationBuilder(item)
+//        )
+
         startForeground(
-            item.id,
-            notificationBuilder.notificationBuilder(item)
+            Int.MAX_VALUE,
+            notificationBuilder.createInitialStubNotification()
         )
 
-//            startForeground(
-//                Int.MAX_VALUE,
-//                notificationBuilder.createInitialStubNotification()
-//            )
-
         serviceScope.launch {
-                    val item = getItemFromIntent(intent, KEY_INTENT)
-                     startNotification(startId,item)
-                    if (item.interval != ALARM_REPEAT) processingAlarm(item, "")
-
+            val item = getItemFromIntent(intent, KEY_INTENT)
+            if (item.interval != ALARM_REPEAT) processingAlarm(item, "")
+            startNotification(startId, item)
         }
 
 
@@ -92,22 +93,31 @@ class MyService : Service(), KoinComponent {
                 alarmRepeat.alarmRepead(item.id)
             }
         }
+
+
     }
 
 
     private suspend fun startNotification(startId: Int, item: Item) {
         withContext(Dispatchers.Main) {
 
-            startForeground(
-                item.id,
-                notificationBuilder.notificationBuilder(item)
-            )
 
-            stopForeground(STOP_FOREGROUND_DETACH)  // снимает foreground-статус, но оставляет уведомление
+            notificationBuilder.input(item)
+            stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf(startId)
-            //notificationBuilder.input(item)
-            //stopForeground(STOP_FOREGROUND_REMOVE)
-            //stopSelf(startId)
+
+//            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
+//                stopForeground(STOP_FOREGROUND_DETACH)
+//                val currentNotification = notificationBuilder.notificationBuilder(item)
+//                currentNotification.flags =
+//                    currentNotification.flags and Notification.FLAG_INSISTENT.inv()
+//                notificationBuilder.alarmPush().notify(item.id, currentNotification)
+//
+//            } else {
+//
+//            }
+//
+//           // stopSelf(startId)
 
 
         }

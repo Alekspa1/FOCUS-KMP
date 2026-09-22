@@ -14,10 +14,12 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.net.Uri
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
+import coil3.toCoilUri
 import com.exampl3.flashlight.R
 import data.perository.MultiplatrormAppSettings
 import data.room.model.Item
@@ -43,7 +45,6 @@ class NotificationBuilder(
 
 
 
-
     fun createInitialStubNotification(): Notification {
         return NotificationCompat.Builder(context, Int.MAX_VALUE.toString())
             .setSmallIcon(R.drawable.icon)
@@ -65,9 +66,9 @@ class NotificationBuilder(
             notificationManager.deleteNotificationChannel(CHANNEL_ID)
         }
 
-//        if(notificationManager.getNotificationChannel(Int.MAX_VALUE.toString()) == null){
-//           notificationManager.createNotificationChannel(createCnanellStub())
-//        }
+        if(notificationManager.getNotificationChannel(Int.MAX_VALUE.toString()) == null){
+           notificationManager.createNotificationChannel(createCnanellStub())
+        }
 
         if (newRingtoneUri != oldRingtoneUri) {
 
@@ -87,6 +88,7 @@ class NotificationBuilder(
     }
 
     private fun createChanel(atrubute: AudioAttributes): NotificationChannel {
+
         val pattern = longArrayOf(0, 1000, 500, 1000, 500)
     return  NotificationChannel(
         newRingtoneUri.toString(),
@@ -173,7 +175,9 @@ class NotificationBuilder(
 
 
         val vibrationPattern = longArrayOf(0, 1000, 500, 1000, 500)
-        val builder = NotificationCompat.Builder(context, newRingtoneUri.toString())
+        val builder = NotificationCompat.Builder(context,
+            newRingtoneUri.toString()
+        )
             .setSmallIcon(R.drawable.icon)
             .setContentTitle(item.name)
             .setContentText(item.desc)
@@ -181,7 +185,7 @@ class NotificationBuilder(
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setStyle(bigIcon)
             .setContentIntent(contentIntent)
-            .setFullScreenIntent(fullScreenIntent, true)
+            //.setFullScreenIntent(fullScreenIntent, true)
             .addAction(0, "Готово", canselIntent)
             .addAction(0, "Отложить", postponeIntent)
             .setCategory(NotificationCompat.CATEGORY_ALARM)

@@ -50,6 +50,7 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
 
 
         if (intent.action == KEY_INTENT_ALARM) {
+
             val serviceIntent = Intent(context, MyService::class.java).apply {
                 action = intent.action
                 putExtras(intent)
