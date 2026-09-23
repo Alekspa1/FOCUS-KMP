@@ -1,5 +1,7 @@
 object CommonConst {
 
+    const val CURRENT_VERSION = 37
+
     const val DEFAULT_DIALOG = "DEFAULT_DIALOG"
     const val DELETE_DIALOG_ITEM = "DELETE_DIALOG_ITEM"
     const val DELETE_DIALOG_CATEGORY = "DELETE_DIALOG_CATEGORY"
@@ -18,7 +20,7 @@ object CommonConst {
     const val ZIP_PICKER = "ZIP_PICKER"
     const val IMAGE_PICKER = "IMAGE_PICKER"
     const val VERSION = "VERSION"
-    const val CURRENT_VERSION = 36
+
 
     const val NOTEBOOK = "NOTEBOOK"
     const val TODO = "TODO"

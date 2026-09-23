@@ -1,8 +1,10 @@
 package data.alarmReceiwer
 
 import CommonConst.CHANNEL_ID
+import CommonConst.CHANNEL_ID_PASSED
 import CommonConst.KEY_INTENT_CALL_BACKREADY
 import CommonConst.KEY_INTENT_CALL_POSTPONE
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -12,9 +14,12 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.net.Uri
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
+import coil3.toCoilUri
 import com.exampl3.flashlight.R
 import data.perository.MultiplatrormAppSettings
 import data.room.model.Item
@@ -39,13 +44,29 @@ class NotificationBuilder(
         AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build()
 
 
+    fun createInitialStubNotification(): Notification {
+        return NotificationCompat.Builder(context, Int.MAX_VALUE.toString())
+            .setSmallIcon(R.drawable.icon)
+            .setContentTitle("Служба будильников")
+            .setContentText("Уведомления активны")
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .build()
+    }
+
+
     fun input(item: Item){
         alarmPush().notify(item.id, notificationBuilder(item))
+
     }
 
     fun alarmPush(): NotificationManager {
         if (notificationManager.getNotificationChannel(CHANNEL_ID) != null) {
             notificationManager.deleteNotificationChannel(CHANNEL_ID)
+        }
+
+        if(notificationManager.getNotificationChannel(Int.MAX_VALUE.toString()) == null){
+           notificationManager.createNotificationChannel(createCnanellStub())
         }
 
         if (newRingtoneUri != oldRingtoneUri) {
@@ -66,6 +87,7 @@ class NotificationBuilder(
     }
 
     private fun createChanel(atrubute: AudioAttributes): NotificationChannel {
+
         val pattern = longArrayOf(0, 1000, 500, 1000, 500)
     return  NotificationChannel(
         newRingtoneUri.toString(),
@@ -81,7 +103,19 @@ class NotificationBuilder(
     }
     }
 
-    private fun notificationBuilder(item: Item): Notification {
+    private fun createCnanellStub() : NotificationChannel{
+
+        return NotificationChannel(
+            Int.MAX_VALUE.toString(),
+            //"Заглушка", NotificationManager.IMPORTANCE_HIGH
+            "Заглушка", NotificationManager.IMPORTANCE_LOW
+        )
+    }
+
+
+
+
+     fun notificationBuilder(item: Item): Notification {
 
         val intentCancel = Intent(context, AlarmReceiwer::class.java)
         intentCancel.setAction(KEY_INTENT_CALL_BACKREADY)
@@ -105,16 +139,24 @@ class NotificationBuilder(
 
 
         val intentPush = Intent(context, MainActivity::class.java).apply {
-            // Добавляем флаги, чтобы не плодить окна и передать данные
             action = Intent.ACTION_VIEW 
-            putExtra("TASK_ID", item.id) // Ключ для извлечения
+            putExtra("TASK_ID", item.id)
             }
+         val intentOpenActivity = Intent(context, MainActivity::class.java).apply {
+             action = Intent.ACTION_VIEW
+         }
 
         val contentIntent =
             PendingIntent.getActivity(
                 context, item.id, intentPush,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
+
+         val fullScreenIntent =
+             PendingIntent.getActivity(
+                 context, item.id, intentOpenActivity,
+                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+             )
 
             val fullPath = image.getUri(item.uri).removePrefix("file://")
 
@@ -127,18 +169,15 @@ class NotificationBuilder(
                 } catch (_: Exception) {
                 null
                 }
-            
-        // val bitmap:Bitmap? = try {
-        //     MediaStore.Images.Media.getBitmap(context.contentResolver, image.getUri(item.uri).toUri())
-        // } catch (_: Exception){
-        //     null
-        // }
+
         val bigIcon = NotificationCompat.BigPictureStyle()
             .bigPicture(bitmap)
 
 
         val vibrationPattern = longArrayOf(0, 1000, 500, 1000, 500)
-        val builder = NotificationCompat.Builder(context, newRingtoneUri.toString())
+        val builder = NotificationCompat.Builder(context,
+            newRingtoneUri.toString()
+        )
             .setSmallIcon(R.drawable.icon)
             .setContentTitle(item.name)
             .setContentText(item.desc)
@@ -146,9 +185,9 @@ class NotificationBuilder(
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setStyle(bigIcon)
             .setContentIntent(contentIntent)
+            .setFullScreenIntent(fullScreenIntent, true)
             .addAction(0, "Готово", canselIntent)
             .addAction(0, "Отложить", postponeIntent)
-            .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
 
 

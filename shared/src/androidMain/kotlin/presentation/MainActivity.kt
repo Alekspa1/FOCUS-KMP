@@ -7,18 +7,15 @@ import androidx.activity.compose.setContent
 import data.repostitory.AndroidPermissionImpl
 import org.koin.android.ext.android.inject
 import MainViewModel
-import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.runtime.LaunchedEffect
+import android.os.Build
+import android.view.View
+import android.view.ViewGroup
 import data.repostitory.AndroidPlatformFilePickerImpl
 import data.repostitory.AndroidVoiceIntentImpl
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import presentation.screens.PremiumScreen
+
 
 
 class MainActivity : ComponentActivity() {
@@ -28,7 +25,7 @@ class MainActivity : ComponentActivity() {
     private val filePickerImp: AndroidPlatformFilePickerImpl by inject()
     private val openVoiceImpl : AndroidVoiceIntentImpl by inject()
 
-
+    private var wasLocked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,13 +33,14 @@ class MainActivity : ComponentActivity() {
         permissionImp.initLauncher(this@MainActivity)
         filePickerImp.initLauncher(this@MainActivity)
         openVoiceImpl.initVoice(this@MainActivity)
+
         if (savedInstanceState == null) {
             val intent = Intent(this@MainActivity, WarmupActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             this@MainActivity.startActivity(intent)
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 this@MainActivity.overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
             } else {
                 @Suppress("DEPRECATION")
@@ -52,14 +50,51 @@ class MainActivity : ComponentActivity() {
         setContent {
             StartApp()
         }
+
+
+
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
     }
+
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        wasLocked = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Делаем сброс только на Android 9–10 (API 28–29), где есть баг с Surface
+        if (wasLocked && Build.VERSION.SDK_INT in 28..29) {
+            forceRenderReset()
+            wasLocked = false
+        } else {
+            // На других версиях просто сбрасываем флаг, чтобы не накапливать состояние
+            wasLocked = false
+        }
+    }
+
+
+
+    private fun forceRenderReset() {
+        window.decorView.post {
+            val dialog = Dialog(this, android.R.style.Theme_Translucent_NoTitleBar).apply {
+                setContentView(View(this@MainActivity).apply {
+                    layoutParams = ViewGroup.LayoutParams(0, 0)
+                })
+                window?.setDimAmount(0f)
+            }
+            dialog.show()
+            dialog.window?.decorView?.postDelayed({ dialog.dismiss() }, 100)
+        }
     }
 
 
@@ -69,6 +104,8 @@ class MainActivity : ComponentActivity() {
         filePickerImp.destroyLauncher()
         openVoiceImpl.destroyVoice()
     }
+
+
 
     private fun handleNotificationIntent(intent: Intent?) {
         if (intent == null) return
@@ -103,9 +140,7 @@ class MainActivity : ComponentActivity() {
                             Intent.FLAG_GRANT_READ_URI_PERMISSION
                         )
                     } catch (e: Exception) {
-                        // Если это обычный Share (не из файлового менеджера),
-                        // этот вызов может кинуть ошибку, это нормально.
-                        // Временных прав от интента всё равно хватит для копирования.
+
                     }
 
                     // 2. Отправляем во ViewModel

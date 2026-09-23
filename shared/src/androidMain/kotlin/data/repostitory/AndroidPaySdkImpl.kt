@@ -48,27 +48,35 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
                     val list = mutableListOf<ProductCommon>()
 
                     products.forEach { product ->
+
                         list.add(
                             ProductCommon(
                                 name = product.title.value,
                                 desc = product.description?.value ?: "",
                                 productId = product.productId.value,
-                                price = (product.price?.value?.div(100)) ?: 0
+                                price = (product.price?.value?.div(100)) ?: 0,
+                                promotion = false
                             )
                         )
                     }
 
-                    val sortedList = list.sortedBy { product ->
-                        when (product.productId) {
-                            ONE_MONTH -> 0
-                            SIX_MONTH -> 1
-                            ONE_YEAR -> 2
-                            FOREVER -> 3
-                            else -> 4 // Страховка для неизвестных ID
+                    list.sortBy { it.price }
+                    val productSixMonth = list.find { it.productId == SIX_MONTH }
+                    val productTwelveMonth = list.find { it.productId == ONE_YEAR }
+
+                    if (productSixMonth != null && productTwelveMonth != null) {
+                        val promotionSixMonth = productSixMonth.price / 6
+                        val promotionOneMonth = productTwelveMonth.price / 12
+
+                        if (promotionSixMonth < promotionOneMonth) {
+                            productSixMonth.promotion = true
+                        } else {
+                            productTwelveMonth.promotion = true
                         }
                     }
+
                     if (continuation.isActive) {
-                        continuation.resume(Result.success(sortedList))
+                        continuation.resume(Result.success(list))
                     }
                 }
                 .addOnFailureListener { throwable: Throwable ->

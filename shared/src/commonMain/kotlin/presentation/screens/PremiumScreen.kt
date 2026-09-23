@@ -89,7 +89,8 @@ fun PremiumScreen(
     innerPadding : PaddingValues = PaddingValues()
     ){
 
-    var isSelected by remember { mutableStateOf(ONE_YEAR) }
+    var isSelected by remember(listProduct) { mutableStateOf(
+        listProduct.find { productCommon -> productCommon.promotion }?.productId ?: ONE_YEAR) }
     
     var isOpenDialogPremiumInfo by remember {mutableStateOf("")}
     
@@ -432,14 +433,6 @@ fun CardBuyPremium(
                     .padding(start = 12.dp, top = 12.dp, bottom = 12.dp, end = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Вместо IconButton используем обычный Icon.
-                // IconButton внутри кликабельной карточки блокирует нажатия на себя!
-//                Icon(
-//                    imageVector = if (currentSelected) Icons.Default.Star else Icons.Outlined.Star, // Меняем на контурную, если не выбрана
-//                    contentDescription = null,
-//                    tint = if (currentSelected) theme.tintPremiumOn else theme.tintPremiumOff,
-//                    modifier = Modifier.size(24.dp)
-//                )
 
                 Column(
                     modifier = Modifier
@@ -473,7 +466,7 @@ fun CardBuyPremium(
         }
 
         // Рисуем шильдик "АКЦИЯ" только если передан текст и карточка выбрана
-        if (productCommon.productId == ONE_YEAR) {
+        if (productCommon.promotion) {
             Surface(
                 shape = RoundedCornerShape(4.dp),
                 color = theme.tintPremiumOn, // Берем ваш золотой/желтый цвет

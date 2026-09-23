@@ -2,11 +2,25 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <queries>
+        <!-- Для Huawei / Honor -->
+        <package android:name="com.huawei.systemmanager" />
+        <!-- Для Xiaomi / Redmi / Poco -->
+        <package android:name="com.miui.securitycenter" />
+        <!-- Для Oppo / Realme -->
+        <package android:name="com.coloros.safecenter" />
+        <package android:name="com.oppo.safe" />
+        <!-- Для Vivo / iQOO -->
+        <package android:name="com.vivo.permissionmanager" />
+        <package android:name="com.iqoo.secure" />
+        <!-- Для Samsung -->
+        <package android:name="com.samsung.android.lool" />
+    </queries>
+
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM"
-        tools:ignore="ExactAlarm" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -15,7 +29,11 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_SETTINGS" />
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
 
     <application
@@ -55,12 +73,23 @@
             </intent-filter>
         </receiver>
 
+        <service
+            android:name="data.alarmReceiwer.MyService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Processing scheduled alarms and task reminders from database" />
+
+        </service>
+
         <activity
     android:launchMode="singleTask"
     android:name="presentation.MainActivity"
     android:exported="true"
     android:screenOrientation="portrait">
-    <!-- ФИЛЬТР №1: Только для обычного запуска приложения с иконки смартфона -->
+
     <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
@@ -89,33 +118,6 @@
             android:exported="false"
             android:launchMode="singleTop" />
 
-        <!-- <activity
-            android:launchMode="singleTask"
-            android:name="presentation.MainActivity"
-            android:exported="true"
-            android:screenOrientation="portrait">
-
-            <intent-filter>
-    <action android:name="android.intent.action.SEND" />
-    <category android:name="android.intent.category.DEFAULT" />
-
-    <data android:mimeType="text/plain" />
-
-    <data android:mimeType="image/*" />
-    </intent-filter>
-
-
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="rustorepayflashlight" />
-            </intent-filter>
-        </activity> -->
         
     </application>
 

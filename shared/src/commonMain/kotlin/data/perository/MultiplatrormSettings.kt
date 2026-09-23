@@ -3,10 +3,13 @@ package data.perository
 import CommonConst.KEY_NOTE_BOOK
 import CommonConst.PLATFORM_DESKTOP
 import CommonConst.PREMIUM_KEY
+import androidx.compose.runtime.traceEventEnd
+import androidx.lifecycle.viewmodel.viewModelFactory
 
 import com.russhwolf.settings.Settings
 import domain.repostirory.GetPlatrormRepository
 import domain.repostirory.SharedPrefRepository
+import org.koin.core.option.viewModelScopeFactory
 
 class MultiplatrormSettings(private val settings: Settings, private val platform : GetPlatrormRepository) : SharedPrefRepository{
 

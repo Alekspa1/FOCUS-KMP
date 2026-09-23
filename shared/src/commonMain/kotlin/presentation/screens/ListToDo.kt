@@ -53,7 +53,7 @@ fun ListToDo(
     val haptic = LocalHapticFeedback.current
 
     // ОПТИМИЗАЦИЯ: Снимок теперь хранит всю связку целиком
-    var currentSnapshotList by remember { mutableStateOf<List<ItemWithSubItems>>(list) }
+    var currentSnapshotList by remember { mutableStateOf(list) }
 
     LaunchedEffect(list) {
         if (currentSnapshotList != list) {
@@ -96,7 +96,7 @@ fun ListToDo(
             itemsIndexed(
                 items = currentSnapshotList,
                 key = { _, target -> target.item.id } // Ключ по ID вложенного item
-            ) { index, target -> // target — это теперь ItemWithSubItems
+            ) { index, target ->
 
                 ReorderableItem(
                     state = reorderableState,

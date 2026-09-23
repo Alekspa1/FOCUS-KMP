@@ -3,6 +3,7 @@
 
 import CommonConst.ALARM_ONE
 import CommonConst.ALARM_SETTINGS
+import CommonConst.APP_SETTINGS
 import CommonConst.BATTERY_OPTIMIZATION
 import CommonConst.DEFAULT_DIALOG
 import CommonConst.INSERT_DIALOG_ITEM
@@ -446,7 +447,8 @@ fun openDialogByTaskId(taskId: Int) {
         sortType,
         categoryItemFlow
     ) { itemsList, allSubItems, sort, currentCategory ->
-        // 1. Фильтруем дела по категории
+
+
         val filteredList = itemsList.filter { it.category == currentCategory }
 
         // 2. Сортируем дела
@@ -633,15 +635,14 @@ fun openDialogByTaskId(taskId: Int) {
             else {
                 val isGranted = permission.requestPermission(permissionName)
                 if (isGranted) {
-                    // Если всё успешно
                     when (permissionName) {
-                        "APP_SETTINGS" -> {  }
+                        APP_SETTINGS -> {  }
                         else -> showDialog = DialogState(permissionName, item)
                     }
                 } else {
                     // Если произошла ошибка или отказ
                     when (permissionName) {
-                        "APP_SETTINGS" -> sendMessage("Не удалось открыть настройки")
+                        APP_SETTINGS -> sendMessage("Не удалось открыть настройки")
                         else -> sendMessage("Для стабильной работы, необходимо дать разрешение")
                     }
                 }
