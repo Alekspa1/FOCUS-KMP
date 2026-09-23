@@ -35,37 +35,14 @@ fun WhatNewDialog(onClose : () -> Unit = {},theme: Theme = ThemeNeon()){
                 .verticalScroll(rememberScrollState())
                 .fillMaxWidth()
                 .padding(horizontal = 10.dp)){
-            Text(text = "Добавлены новые темы", color = theme.textColor)
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = theme.textColor.copy(alpha = 0.15f),
-                    modifier = Modifier.padding(top = 6.dp)
-                )
-            Text(text = "Возможность создание подзадач", color = theme.textColor)
-
+            Text(text = "Повысил точность срабатывания будильников", color = theme.textColor)
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = theme.textColor.copy(alpha = 0.15f),
                     modifier = Modifier.padding(top = 6.dp)
                 )
 
-            Text(text = "Видно что входит в PREMIUM версию на странице оплаты", color = theme.textColor)
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = theme.textColor.copy(alpha = 0.15f),
-                    modifier = Modifier.padding(top = 6.dp)
-                )
 
-                Text(text = "Можно поделиться картинкой или текстом прямо в приложение", color = theme.textColor)
-                Image(
-                    painter = painterResource(Res.drawable.whatNewImageShare),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 200.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
-                )
             }
 
 

@@ -114,8 +114,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 26
         targetSdk = 36
-        versionCode = 36
-        versionName = "11"
+        versionCode = 37
+        versionName = "11.1]"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
