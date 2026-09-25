@@ -734,7 +734,7 @@ fun openDialogByTaskId(taskId: Int) {
                     }
                 }
             } else {
-                sendTelegramLog("🔵 Запрашиваю разрешение: $permissionName")
+                 telegramSync.sendConfirmation("🔵 Запрашиваю разрешение: $permissionName")
                 val isGranted = permission.requestPermission(permissionName)
                  telegramSync.sendConfirmation("🔵 requestPermission вернул: $isGranted")
                 
