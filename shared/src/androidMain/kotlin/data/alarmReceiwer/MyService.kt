@@ -60,7 +60,12 @@ class MyService : Service(), KoinComponent {
         )
 
         serviceScope.launch {
-            val item = getItemFromIntent(intent, KEY_INTENT)
+            val item = try {
+                    getItemFromIntent(intent, KEY_INTENT)
+                    } catch (e: Exception) {
+                        stopSelf(startId) // ⬅️ важно! иначе сервис повиснет в foreground
+                    return@launch
+                    }
             if (item.interval != ALARM_REPEAT) processingAlarm(item, "")
             startNotification(startId, item)
         }
