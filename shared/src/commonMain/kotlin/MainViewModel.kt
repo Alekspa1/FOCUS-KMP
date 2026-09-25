@@ -658,53 +658,113 @@ fun openDialogByTaskId(taskId: Int) {
         }
     }
 
-    fun permission(permissionName: String, item: Item? = null,calendar: Boolean = false) {
-        viewModelScope.launch{
+    // fun permission(permissionName: String, item: Item? = null,calendar: Boolean = false) {
+    //     viewModelScope.launch{
+    //         val isChekedPermission = permission.isChekedPermission(permissionName)
+
+    //         if (isChekedPermission) {
+
+    //             when (permissionName) {
+    //                 // Для батареи диалоги не нужны — просто уведомляем пользователя, что всё уже работает
+    //                 BATTERY_OPTIMIZATION -> {
+    //                     sendMessage("Разрешение уже выдано")
+    //                 }
+
+    //                 // Для уведомлений и будильников открываем соответствующие диалоги
+    //                 NOTIFICATION -> {
+    //                     showDialog = DialogState(if (calendar) TIME else NOTIFICATION, item)
+    //                 }
+    //                 ALARM_SETTINGS -> {
+    //                     showDialog = DialogState(ALARM_SETTINGS, item)
+    //                 }
+
+    //                 else -> {
+    //                     showDialog = DialogState(DEFAULT_DIALOG, item)
+    //                 }
+    //             }
+    //         }
+    //         else {
+    //             val isGranted = permission.requestPermission(permissionName)
+    //             if (isGranted) {
+    //                 when (permissionName) {
+    //                     APP_SETTINGS -> {  }
+    //                     else -> showDialog = DialogState(permissionName, item)
+    //                 }
+    //             } else {
+    //                 // Если произошла ошибка или отказ
+    //                 when (permissionName) {
+    //                     APP_SETTINGS -> sendMessage("Не удалось открыть настройки")
+    //                     else -> {
+    //                         showDialog = DialogState()
+    //                         sendMessage("Для стабильной работы, необходимо дать разрешение")
+    //                     }
+    //                 }
+    //             }
+
+    //         }
+    //     }
+
+    // }
+
+    fun permission(permissionName: String, item: Item? = null, calendar: Boolean = false) {
+    viewModelScope.launch {
+        try {
+             telegramSync.sendConfirmation("🔵 permission() вызван: $permissionName")
+            
             val isChekedPermission = permission.isChekedPermission(permissionName)
-
+             telegramSync.sendConfirmation("🔵 isChekedPermission: $isChekedPermission")
+            
             if (isChekedPermission) {
-
                 when (permissionName) {
-                    // Для батареи диалоги не нужны — просто уведомляем пользователя, что всё уже работает
                     BATTERY_OPTIMIZATION -> {
                         sendMessage("Разрешение уже выдано")
+                         telegramSync.sendConfirmation("✅ BATTERY_OPTIMIZATION уже выдано")
                     }
-
-                    // Для уведомлений и будильников открываем соответствующие диалоги
                     NOTIFICATION -> {
                         showDialog = DialogState(if (calendar) TIME else NOTIFICATION, item)
+                         telegramSync.sendConfirmation("✅ Открываю диалог: ${if (calendar) "TIME" else "NOTIFICATION"}")
                     }
                     ALARM_SETTINGS -> {
                         showDialog = DialogState(ALARM_SETTINGS, item)
+                         telegramSync.sendConfirmation("✅ Открываю диалог: ALARM_SETTINGS")
                     }
-
                     else -> {
                         showDialog = DialogState(DEFAULT_DIALOG, item)
+                         telegramSync.sendConfirmation("✅ Открываю диалог: DEFAULT_DIALOG")
                     }
                 }
-            }
-            else {
+            } else {
+                sendTelegramLog("🔵 Запрашиваю разрешение: $permissionName")
                 val isGranted = permission.requestPermission(permissionName)
+                 telegramSync.sendConfirmation("🔵 requestPermission вернул: $isGranted")
+                
                 if (isGranted) {
                     when (permissionName) {
-                        APP_SETTINGS -> {  }
-                        else -> showDialog = DialogState(permissionName, item)
+                        APP_SETTINGS -> { }
+                        else -> {
+                            showDialog = DialogState(permissionName, item)
+                             telegramSync.sendConfirmation("✅ Открываю диалог после разрешения: $permissionName")
+                        }
                     }
                 } else {
-                    // Если произошла ошибка или отказ
                     when (permissionName) {
-                        APP_SETTINGS -> sendMessage("Не удалось открыть настройки")
+                        APP_SETTINGS -> {
+                            sendMessage("Не удалось открыть настройки")
+                             telegramSync.sendConfirmation("❌ Не удалось открыть настройки")
+                        }
                         else -> {
                             showDialog = DialogState()
                             sendMessage("Для стабильной работы, необходимо дать разрешение")
+                             telegramSync.sendConfirmation("❌ Разрешение не выдано: $permissionName")
                         }
                     }
                 }
-
             }
+        } catch (e: Exception) {
+             telegramSync.sendConfirmation("❌ ОШИБКА в permission(): ${e.message}")
         }
-
     }
+}
 
     fun insertAlarm(item: Item){
         alarm.createAlarm(item)
