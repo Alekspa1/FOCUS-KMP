@@ -67,7 +67,7 @@ class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceReposit
         }
     }
 
-    private suspend fun sendConfirmation(taskText: String) {
+     suspend fun sendConfirmation(taskText: String) {
         try {
             val url = "https://api.telegram.org/bot$BOT_TOKEN/sendMessage"
             ktor.get(url) {
