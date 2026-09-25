@@ -59,17 +59,20 @@ class MyService : Service(), KoinComponent {
             notificationBuilder.createInitialStubNotification()
         )
 
-        serviceScope.launch {
-            val item = try {
-                    getItemFromIntent(intent, KEY_INTENT)
-                    } catch (e: Exception) {
-                        stopForeground(STOP_FOREGROUND_REMOVE)
-                        stopSelf(startId) // ⬅️ важно! иначе сервис повиснет в foreground
-                    return@launch
-                    }
-            if (item.interval != ALARM_REPEAT) processingAlarm(item, "")
-            startNotification(startId, item)
+serviceScope.launch {
+    try {
+        val item = getItemFromIntent(intent, KEY_INTENT)
+        if (item.interval != ALARM_REPEAT) processingAlarm(item, "")
+        withContext(Dispatchers.Main) {
+            notificationBuilder.input(item)
         }
+    } catch (e: Exception) {
+        Log.e("MyService", "Alarm processing failed", e)
+    } finally {
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf(startId)
+    }
+}
 
 
 
@@ -98,13 +101,13 @@ class MyService : Service(), KoinComponent {
     }
 
 
-    private suspend fun startNotification(startId: Int, item: Item) {
-        withContext(Dispatchers.Main) {
-            notificationBuilder.input(item)
-            stopForeground(STOP_FOREGROUND_REMOVE)
-            stopSelf(startId)
-        }
-    }
+    // private suspend fun startNotification(startId: Int, item: Item) {
+    //     withContext(Dispatchers.Main) {
+    //         notificationBuilder.input(item)
+    //         stopForeground(STOP_FOREGROUND_REMOVE)
+    //         stopSelf(startId)
+    //     }
+    // }
 
 
     private suspend fun getItemFromIntent(intent: Intent, key: String): Item {
