@@ -146,7 +146,7 @@ class AndroidPermissionImpl(
     
     when (permissionName) {
         BATTERY_OPTIMIZATION -> {
-            sendTelegramLog("🔵 Открываю настройки батареи")
+             telegramSync.sendConfirmation("🔵 Открываю настройки батареи")
             val intent = getBatteryOptimizationIntent(context).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
