@@ -107,7 +107,6 @@ class NotificationBuilder(
 
         return NotificationChannel(
             Int.MAX_VALUE.toString(),
-            //"Заглушка", NotificationManager.IMPORTANCE_HIGH
             "Заглушка", NotificationManager.IMPORTANCE_LOW
         )
     }
@@ -142,6 +141,7 @@ class NotificationBuilder(
             action = Intent.ACTION_VIEW 
             putExtra("TASK_ID", item.id)
             }
+
          val intentOpenActivity = Intent(context, MainActivity::class.java).apply {
              action = Intent.ACTION_VIEW
          }
@@ -154,7 +154,7 @@ class NotificationBuilder(
 
          val fullScreenIntent =
              PendingIntent.getActivity(
-                 context, item.id, intentOpenActivity,
+                 context, item.id*-1, intentOpenActivity,
                  PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
              )
 
@@ -186,6 +186,7 @@ class NotificationBuilder(
             .setStyle(bigIcon)
             .setContentIntent(contentIntent)
             .setFullScreenIntent(fullScreenIntent, true)
+            .setAutoCancel(true)
             .addAction(0, "Готово", canselIntent)
             .addAction(0, "Отложить", postponeIntent)
             .setCategory(NotificationCompat.CATEGORY_ALARM)

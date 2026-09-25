@@ -643,7 +643,10 @@ fun openDialogByTaskId(taskId: Int) {
                     // Если произошла ошибка или отказ
                     when (permissionName) {
                         APP_SETTINGS -> sendMessage("Не удалось открыть настройки")
-                        else -> sendMessage("Для стабильной работы, необходимо дать разрешение")
+                        else -> {
+                            showDialog = DialogState()
+                            sendMessage("Для стабильной работы, необходимо дать разрешение")
+                        }
                     }
                 }
 

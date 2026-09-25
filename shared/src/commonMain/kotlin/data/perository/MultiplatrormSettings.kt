@@ -4,6 +4,7 @@ import CommonConst.KEY_NOTE_BOOK
 import CommonConst.PLATFORM_DESKTOP
 import CommonConst.PREMIUM_KEY
 import androidx.compose.runtime.traceEventEnd
+import androidx.compose.runtime.traceEventStart
 import androidx.lifecycle.viewmodel.viewModelFactory
 
 import com.russhwolf.settings.Settings

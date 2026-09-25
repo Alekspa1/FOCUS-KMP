@@ -51,8 +51,6 @@ class MainActivity : ComponentActivity() {
             StartApp()
         }
 
-
-
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
     }
@@ -71,6 +69,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        forceRenderReset()
 
         // Делаем сброс только на Android 9–10 (API 28–29), где есть баг с Surface
         if (wasLocked && Build.VERSION.SDK_INT in 28..29) {
@@ -93,7 +92,7 @@ class MainActivity : ComponentActivity() {
                 window?.setDimAmount(0f)
             }
             dialog.show()
-            dialog.window?.decorView?.postDelayed({ dialog.dismiss() }, 100)
+            dialog.window?.decorView?.postDelayed({ dialog.dismiss() }, 200)
         }
     }
 
@@ -109,10 +108,8 @@ class MainActivity : ComponentActivity() {
 
     private fun handleNotificationIntent(intent: Intent?) {
         if (intent == null) return
-
         val taskId = intent.getIntExtra("TASK_ID", -1)
         if (taskId != -1) {
-            // Вызываем новый метод во вьюмодели
             mainViewModel.openDialogByTaskId(taskId)
         }
     }
@@ -125,7 +122,9 @@ class MainActivity : ComponentActivity() {
             type.startsWith("text/") -> {
                 val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (!sharedText.isNullOrBlank()) {
-                    mainViewModel.openDialogWithSharedData(text = sharedText, imageUri = null)
+                    // Защита: очищаем ClipData интента, чтобы KMP-слой не пытался прочитать скрытые медиа-ссылки сайтов
+                    val cleanText = sharedText.trim().replace("\r", "")
+                    mainViewModel.openDialogWithSharedData(text = cleanText, imageUri = null)
                 }
             }
 
