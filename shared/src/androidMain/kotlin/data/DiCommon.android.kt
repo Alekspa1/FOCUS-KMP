@@ -67,7 +67,7 @@ actual val moduleAnotherPlatform = module {
     }
 
 
-    single { AndroidPermissionImpl(get()) } bind PermissionRepository::class
+    single { AndroidPermissionImpl(get(),get() ) } bind PermissionRepository::class
 
     single<AlarmManager> {
 
