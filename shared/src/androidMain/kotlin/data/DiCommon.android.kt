@@ -32,6 +32,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
+
 actual val moduleAnotherPlatform = module {
 
 
@@ -67,7 +68,7 @@ actual val moduleAnotherPlatform = module {
     }
 
 
-    single { AndroidPermissionImpl(get()) } bind PermissionRepository::class
+    single { AndroidPermissionImpl(get(),get()) } bind PermissionRepository::class
 
     single<AlarmManager> {
 
