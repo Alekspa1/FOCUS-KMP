@@ -83,12 +83,13 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
 
 
         return suspendCancellableCoroutine { continuation ->
+           
 
             // Задаем действие на случай, если корутина будет отменена извне
             continuation.invokeOnCancellation {
                 permissionCallback = null
             }
-
+             permissionCallback?.invoke(false)
             // Регистрируем мост: когда лаунчер вернет ответ, корутина возобновится
             permissionCallback = { isGranted ->
                 if (continuation.isActive) {
@@ -97,11 +98,15 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
             }
 
             // 3. Запускаем лаунчер
+            try{
             when (permissionName) {
+
+
                 NOTIFICATION -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         pLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
                     } else {
+                        permissionCallback = null
                         continuation.resume(true)
                     }
                 }
@@ -113,6 +118,10 @@ class AndroidPermissionImpl(private val context: Context):PermissionRepository{
                     }
                     pLauncher?.launch(permission)
                 }
+            }
+        } catch (e: Exception) {
+            permissionCallback = null
+                if (continuation.isActive) continuation.resume(false)
             }
         }
     }
