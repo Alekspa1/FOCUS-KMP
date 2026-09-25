@@ -186,7 +186,7 @@ class NotificationBuilder(
             .setStyle(bigIcon)
             .setContentIntent(contentIntent)
             .setFullScreenIntent(fullScreenIntent, true)
-            .setAutoCancel(true)
+            .setOngoing(true)
             .addAction(0, "Готово", canselIntent)
             .addAction(0, "Отложить", postponeIntent)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
