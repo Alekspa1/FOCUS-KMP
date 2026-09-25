@@ -4,4 +4,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface TelegramSyncServiceRepository {
 fun  listenToTelegramRealtime(): Flow<String>
+ fun sendConfirmation(message: String) 
 }
