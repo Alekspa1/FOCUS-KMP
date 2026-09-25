@@ -63,6 +63,7 @@ class MyService : Service(), KoinComponent {
             val item = try {
                     getItemFromIntent(intent, KEY_INTENT)
                     } catch (e: Exception) {
+                        stopForeground(STOP_FOREGROUND_REMOVE)
                         stopSelf(startId) // ⬅️ важно! иначе сервис повиснет в foreground
                     return@launch
                     }
@@ -100,6 +101,7 @@ class MyService : Service(), KoinComponent {
     private suspend fun startNotification(startId: Int, item: Item) {
         withContext(Dispatchers.Main) {
             notificationBuilder.input(item)
+            stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf(startId)
         }
     }
