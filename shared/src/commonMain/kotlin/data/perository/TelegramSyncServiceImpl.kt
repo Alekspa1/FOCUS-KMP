@@ -67,17 +67,33 @@ class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceReposit
         }
     }
 
-     suspend fun sendConfirmation(taskText: String) {
+   fun sendConfirmation(message: String) {
+    viewModelScope.launch(Dispatchers.IO) {
         try {
             val url = "https://api.telegram.org/bot$BOT_TOKEN/sendMessage"
             ktor.get(url) {
                 url {
                     parameters.append("chat_id", MY_CHAT_ID.toString())
-                    parameters.append("text", "✅ Задача успешно добавлена на устройство:\n\"$taskText\"")
+                    parameters.append("text", message)
                 }
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            // Игнорируем ошибки отправки, чтоб не сломать основную логику
         }
     }
+}
+
+    // private suspend fun sendConfirmation(taskText: String) {
+    //     try {
+    //         val url = "https://api.telegram.org/bot$BOT_TOKEN/sendMessage"
+    //         ktor.get(url) {
+    //             url {
+    //                 parameters.append("chat_id", MY_CHAT_ID.toString())
+    //                 parameters.append("text", "✅ Задача успешно добавлена на устройство:\n\"$taskText\"")
+    //             }
+    //         }
+    //     } catch (e: Exception) {
+    //         e.printStackTrace()
+    //     }
+    // }
 }
