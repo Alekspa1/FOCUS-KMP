@@ -67,7 +67,7 @@ serviceScope.launch {
             notificationBuilder.input(item)
         }
     } catch (e: Exception) {
-        Log.e("MyService", "Alarm processing failed", e)
+        
     } finally {
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf(startId)
