@@ -515,47 +515,98 @@ fun openDialogByTaskId(taskId: Int) {
         return db.getSubItemsForTask(taskId)
     }
 
+    //     fun insertItem(
+    //     item: Item,
+    //     subItems: List<SubItem> = emptyList(),
+    //     alarm: Boolean = false,
+    //     calendar: Boolean = false
+    // ) {
+    //     viewModelScope.launch(Dispatchers.IO) {
+    //         telegramSync.sendConfirmation("🔵 insertItem вызван: alarm=$alarm, item.id=${item.id}")
+            
+    //         val finalItem = if (item.id == 0) {
+    //             val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
+    //             item.copy(sort = currentMinSort - 1)
+    //         } else {
+    //             item
+    //         }
+
+    //         // 1. Сохраняем дело и получаем его реальный ID
+    //         val insertedId = db.insertItem(finalItem).toInt()
+            
+    //         // 2. ЕСЛИ ЭТО РЕДАКТИРОВАНИЕ (item.id != 0), чистим старые подзадачи дела в БД
+    //         if (item.id != 0) {
+    //             db.deleteAllSubItemsForTask(item.id)
+    //         }
+
+    //         // 3. Перепривязываем подзадачи к ID дела (для новых дел это будет insertedId)
+    //         val updatedSubItems = subItems.map { subItem ->
+    //             // Важно: обнуляем id самой подзадачи, так как мы пишем их заново как новые строки
+    //             subItem.copy(id = 0, idTask = insertedId)
+    //         }
+
+    //         // 4. Записываем финальный список подзадач из диалога
+    //         db.insertSubItems(updatedSubItems)
+
+    //         withContext(Dispatchers.Main) {
+    //             if (alarm) {
+    //                 val savedItem = finalItem.copy(id = insertedId)
+    //                 permission(NOTIFICATION, savedItem, calendar)
+    //             } else {
+    //                 showDialog = DialogState()
+    //             }
+    //         }
+    //     }
+    // }
+
         fun insertItem(
-        item: Item,
-        subItems: List<SubItem> = emptyList(),
-        alarm: Boolean = false,
-        calendar: Boolean = false
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
+    item: Item,
+    subItems: List<SubItem> = emptyList(),
+    alarm: Boolean = false,
+    calendar: Boolean = false
+) {
+    viewModelScope.launch(Dispatchers.IO) {
+        try {
+             telegramSync.sendConfirmation("🔵 insertItem вызван: alarm=$alarm, item.id=${item.id}")
+            
             val finalItem = if (item.id == 0) {
                 val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
                 item.copy(sort = currentMinSort - 1)
             } else {
                 item
             }
-
-            // 1. Сохраняем дело и получаем его реальный ID
+            
+             telegramSync.sendConfirmation("🔵 Перед db.insertItem(), finalItem.sort=${finalItem.sort}")
             val insertedId = db.insertItem(finalItem).toInt()
-
-            // 2. ЕСЛИ ЭТО РЕДАКТИРОВАНИЕ (item.id != 0), чистим старые подзадачи дела в БД
+             telegramSync.sendConfirmation("✅ Заметка создана: id=$insertedId")
+            
             if (item.id != 0) {
                 db.deleteAllSubItemsForTask(item.id)
             }
-
-            // 3. Перепривязываем подзадачи к ID дела (для новых дел это будет insertedId)
+            
             val updatedSubItems = subItems.map { subItem ->
-                // Важно: обнуляем id самой подзадачи, так как мы пишем их заново как новые строки
                 subItem.copy(id = 0, idTask = insertedId)
             }
-
-            // 4. Записываем финальный список подзадач из диалога
+            
             db.insertSubItems(updatedSubItems)
-
+             telegramSync.sendConfirmation("✅ Подзадачи сохранены: count=${updatedSubItems.size}")
+            
             withContext(Dispatchers.Main) {
                 if (alarm) {
+                     telegramSync.sendConfirmation("🔵 Запускаю permission() с alarm=true")
                     val savedItem = finalItem.copy(id = insertedId)
                     permission(NOTIFICATION, savedItem, calendar)
+                     telegramSync.sendConfirmation("✅ permission() завершён")
                 } else {
                     showDialog = DialogState()
+                     telegramSync.sendConfirmation("✅ Диалог закрыт (alarm=false)")
                 }
             }
+        } catch (e: Exception) {
+             telegramSync.sendConfirmation("❌ ОШИБКА в insertItem: ${e.message}\n${e.stackTraceToString().take(500)}")
         }
     }
+}
 
     fun deleteItem(item: Item){
         viewModelScope.launch(Dispatchers.IO) {
