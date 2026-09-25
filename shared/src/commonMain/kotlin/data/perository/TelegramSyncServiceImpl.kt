@@ -75,7 +75,7 @@ class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceReposit
         }
     }
 
-   fun sendConfirmation(message: String) {
+ override  fun sendConfirmation(message: String) {
     scope.launch(Dispatchers.IO) {
         try {
             val url = "https://api.telegram.org/bot$BOT_TOKEN/sendMessage"
