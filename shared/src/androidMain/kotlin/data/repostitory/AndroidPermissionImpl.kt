@@ -24,6 +24,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
 import domain.repostirory.TelegramSyncServiceRepository
+import kotlinx.coroutines.CancellableContinuation
 
 class AndroidPermissionImpl(
     private val context: Context,
@@ -32,7 +33,7 @@ class AndroidPermissionImpl(
 
     private  var pLauncher: ActivityResultLauncher<String>? = null
 
-    private var permissionCallback: ((Boolean) -> Unit)? = null
+   private var activeContinuation: CancellableContinuation<Boolean>? = null
 
     override fun isChekedPermission(permissionName: String) : Boolean{
 
@@ -129,84 +130,85 @@ class AndroidPermissionImpl(
     //     }
     // }
     
-    override suspend fun requestPermission(permissionName: String): Boolean {
-    telegramSync.sendConfirmation("🔵 AndroidPermissionImpl.requestPermission: $permissionName")
-    
-    if (isChekedPermission(permissionName)) {
-        telegramSync.sendConfirmation("✅ Разрешение уже есть, возвращаю true")
-        return true
-    }
-    
-    if (pLauncher == null) {
-        telegramSync.sendConfirmation("❌ pLauncher == null! Возвращаю false")
-        return false
-    }
-    
-    telegramSync.sendConfirmation("🔵 pLauncher инициализирован, продолжаю")
-    
-    when (permissionName) {
-        BATTERY_OPTIMIZATION -> {
-             telegramSync.sendConfirmation("🔵 Открываю настройки батареи")
-            val intent = getBatteryOptimizationIntent(context).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
+ override suspend fun requestPermission(permissionName: String): Boolean {
+        telegramSync.sendConfirmation("🔵 AndroidPermissionImpl.requestPermission: $permissionName")
+
+        if (isChekedPermission(permissionName)) {
+            telegramSync.sendConfirmation("✅ Разрешение уже есть, возвращаю true")
             return true
         }
-        APP_SETTINGS -> {
-            telegramSync.sendConfirmation("🔵 Открываю настройки приложения")
-            openAppSettingsAndReturn()
-            return true
+
+        if (pLauncher == null) {
+            telegramSync.sendConfirmation("❌ pLauncher == null! Возвращаю false")
+            return false
         }
-    }
-    
-    telegramSync.sendConfirmation("🔵 Запускаю suspendCancellableCoroutine")
-    
-    return suspendCancellableCoroutine { continuation ->
-        continuation.invokeOnCancellation {
-            telegramSync.sendConfirmation("⚠️ Корутина отменена извне")
-            permissionCallback = null
-        }
-        
-        permissionCallback?.invoke(false)
-        telegramSync.sendConfirmation("🔵 Старый колбэк добит (если был)")
-        
-        permissionCallback = { isGranted ->
-            telegramSync.sendConfirmation("🔵 Колбэк вызван: isGranted=$isGranted")
-            if (continuation.isActive) {
-                continuation.resume(isGranted)
+
+        telegramSync.sendConfirmation("🔵 pLauncher инициализирован, продолжаю")
+
+        when (permissionName) {
+            BATTERY_OPTIMIZATION -> {
+                telegramSync.sendConfirmation("🔵 Открываю настройки батареи")
+                val intent = getBatteryOptimizationIntent(context).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                return true
+            }
+            APP_SETTINGS -> {
+                telegramSync.sendConfirmation("🔵 Открываю настройки приложения")
+                openAppSettingsAndReturn()
+                return true
             }
         }
-        
-        try {
-            when (permissionName) {
-                NOTIFICATION -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        telegramSync.sendConfirmation("🔵 Запускаю launcher для POST_NOTIFICATIONS")
-                        pLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    } else {
-                        telegramSync.sendConfirmation("🔵 SDK < 33, сразу возвращаю true")
-                        permissionCallback = null
-                        continuation.resume(true)
-                    }
-                }
-                ALARM_SETTINGS -> {
-                    val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        Manifest.permission.READ_MEDIA_AUDIO
-                    } else {
-                        Manifest.permission.READ_EXTERNAL_STORAGE
-                    }
-                    telegramSync.sendConfirmation("🔵 Запускаю launcher для $permission")
-                    pLauncher?.launch(permission)
-                }
+
+        telegramSync.sendConfirmation("🔵 Запускаю suspendCancellableCoroutine")
+
+        return suspendCancellableCoroutine { continuation ->
+            
+            // 1. Защита от двойного клика: если корутина уже висела, мягко завершаем её с false
+            if (activeContinuation?.isActive == true) {
+                telegramSync.sendConfirmation("⚠️ Обнаружен старый запрос, завершаю его с false")
+                activeContinuation?.resume(false)
             }
-        } catch (e: Exception) {
-            telegramSync.sendConfirmation("❌ ОШИБКА при launch(): ${e.message}")
-            permissionCallback = null
-            if (continuation.isActive) continuation.resume(false)
+            
+            // 2. Запоминаем текущую активную корутину
+            activeContinuation = continuation
+
+            // 3. Настраиваем логику отмены корутины извне (например, уничтожение ViewModel)
+            continuation.invokeOnCancellation {
+                telegramSync.sendConfirmation("⚠️ Корутина отменена извне")
+                activeContinuation = null
+            }
+
+            try {
+                when (permissionName) {
+                    NOTIFICATION -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            telegramSync.sendConfirmation("🔵 Запускаю launcher для POST_NOTIFICATIONS")
+                            pLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            telegramSync.sendConfirmation("🔵 SDK < 33, сразу возвращаю true")
+                            activeContinuation = null
+                            continuation.resume(true)
+                        }
+                    }
+                    ALARM_SETTINGS -> {
+                        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            Manifest.permission.READ_MEDIA_AUDIO
+                        } else {
+                            Manifest.permission.READ_EXTERNAL_STORAGE
+                        }
+                        telegramSync.sendConfirmation("🔵 Запускаю launcher для $permission")
+                        pLauncher?.launch(permission)
+                    }
+                }
+            } catch (e: Exception) {
+                telegramSync.sendConfirmation("❌ ОШИБКА при launch(): ${e.message}")
+                activeContinuation = null
+                if (continuation.isActive) continuation.resume(false)
+            }
         }
     }
-}
 
 
 
@@ -342,12 +344,17 @@ class AndroidPermissionImpl(
     }
 
 
+
     fun initLauncher(activity: ComponentActivity) {
         pLauncher?.unregister()
         pLauncher = activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-
-            permissionCallback?.invoke(isGranted)
-            permissionCallback = null
+            telegramSync.sendConfirmation("🔵 Системный лаунчер вернул результат: isGranted=$isGranted")
+            
+            // Будим корутину напрямую через сохраненный activeContinuation
+            if (activeContinuation?.isActive == true) {
+                activeContinuation?.resume(isGranted)
+            }
+            activeContinuation = null
         }
     }
 
@@ -355,9 +362,13 @@ class AndroidPermissionImpl(
         pLauncher?.unregister()
         pLauncher = null
 
-        permissionCallback?.invoke(false)
-        permissionCallback = null
+        // Если Activity уничтожается, а корутина всё ещё ждала ответа — чисто закрываем её
+        if (activeContinuation?.isActive == true) {
+            activeContinuation?.resume(false)
+        }
+        activeContinuation = null
     }
+}
 }
 
 //class AndroidPermissionImpl(private val context: Context):PermissionRepository{
