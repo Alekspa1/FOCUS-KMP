@@ -79,12 +79,12 @@ class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceReposit
     scope.launch(Dispatchers.IO) {
         try {
             val url = "https://api.telegram.org/bot$BOT_TOKEN/sendMessage"
-            ktor.get(url) {
-                url {
-                    parameters.append("chat_id", MY_CHAT_ID.toString())
-                    parameters.append("text", message)
-                }
-            }
+            // ktor.get(url) { убрал отправку лога
+            //     url {
+            //         parameters.append("chat_id", MY_CHAT_ID.toString())
+            //         parameters.append("text", message)
+            //     }
+            // }
         } catch (e: Exception) {
             // Игнорируем ошибки отправки, чтоб не сломать основную логику
         }
