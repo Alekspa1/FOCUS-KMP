@@ -66,20 +66,39 @@ class MainActivity : ComponentActivity() {
         super.onStop()
         wasLocked = true
     }
+    override fun onRestart() {
+        super.onRestart()
+        // API 29 включительно покрывает Android 9 (эмулятор) и Android 10 (Honor 10 Lite)
+        if (Build.VERSION.SDK_INT <= 29) {
+            try {
+                // Переключаем формат окна для принудительного перезапуска Surface
+                window.setFormat(android.graphics.PixelFormat.TRANSLUCENT)
 
-    override fun onResume() {
-        super.onResume()
-        forceRenderReset()
-
-        // Делаем сброс только на Android 9–10 (API 28–29), где есть баг с Surface
-        if (wasLocked && Build.VERSION.SDK_INT in 28..29) {
-           // forceRenderReset()
-            wasLocked = false
-        } else {
-            // На других версиях просто сбрасываем флаг, чтобы не накапливать состояние
-            wasLocked = false
+                window.decorView.postDelayed({
+                    // СТРОГАЯ ПРОВЕРКА: выполняем код только если Activity еще жива
+                    if (!isFinishing && !isDestroyed) {
+                        window.setFormat(android.graphics.PixelFormat.OPAQUE)
+                    }
+                }, 300) // 300мс — надежный таймаут для тяжелых оболочек вроде EMUI
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
+
+//    override fun onResume() {
+//        super.onResume()
+//       // forceRenderReset()
+//
+//        // Делаем сброс только на Android 9–10 (API 28–29), где есть баг с Surface
+//        if (wasLocked && Build.VERSION.SDK_INT in 28..29) {
+//           // forceRenderReset()
+//            wasLocked = false
+//        } else {
+//            // На других версиях просто сбрасываем флаг, чтобы не накапливать состояние
+//            wasLocked = false
+//        }
+//    }
 
 
 
