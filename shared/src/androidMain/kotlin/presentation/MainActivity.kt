@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
 
         // Делаем сброс только на Android 9–10 (API 28–29), где есть баг с Surface
         if (wasLocked && Build.VERSION.SDK_INT in 28..29) {
-            forceRenderReset()
+           // forceRenderReset()
             wasLocked = false
         } else {
             // На других версиях просто сбрасываем флаг, чтобы не накапливать состояние
@@ -92,7 +92,7 @@ class MainActivity : ComponentActivity() {
                 window?.setDimAmount(0f)
             }
             dialog.show()
-            dialog.window?.decorView?.postDelayed({ dialog.dismiss() }, 200)
+            dialog.window?.decorView?.postDelayed({ dialog.dismiss() }, 300)
         }
     }
 

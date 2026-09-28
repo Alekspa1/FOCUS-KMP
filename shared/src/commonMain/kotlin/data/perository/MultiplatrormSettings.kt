@@ -49,7 +49,7 @@ class MultiplatrormSettings(private val settings: Settings, private val platform
 
     }
 
-    override fun getPremium(): Boolean = settings.getBoolean(PREMIUM_KEY, false)
+    override fun getPremium(): Boolean = settings.getBoolean(PREMIUM_KEY, true)
 
 
 }

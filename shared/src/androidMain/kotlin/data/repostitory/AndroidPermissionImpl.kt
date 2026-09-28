@@ -177,7 +177,9 @@ class AndroidPermissionImpl(
             // 3. Настраиваем логику отмены корутины извне (например, уничтожение ViewModel)
             continuation.invokeOnCancellation {
                 telegramSync.sendConfirmation("⚠️ Корутина отменена извне")
-                activeContinuation = null
+                if(activeContinuation == continuation) {
+                    activeContinuation = null
+                }
             }
 
             try {
@@ -204,7 +206,9 @@ class AndroidPermissionImpl(
                 }
             } catch (e: Exception) {
                 telegramSync.sendConfirmation("❌ ОШИБКА при launch(): ${e.message}")
-                activeContinuation = null
+                if(activeContinuation == continuation) {
+                    activeContinuation = null
+                }
                 if (continuation.isActive) continuation.resume(false)
             }
         }
