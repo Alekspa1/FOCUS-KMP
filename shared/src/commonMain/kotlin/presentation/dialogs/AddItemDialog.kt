@@ -76,6 +76,7 @@ import androidx.compose.material3.HorizontalDivider
 // Для инлайнового текстового поля и стилей (BasicTextField, LocalTextStyle)
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.style.TextOverflow
 

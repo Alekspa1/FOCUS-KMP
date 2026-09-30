@@ -515,49 +515,6 @@ fun openDialogByTaskId(taskId: Int) {
         return db.getSubItemsForTask(taskId)
     }
 
-    //     fun insertItem(
-    //     item: Item,
-    //     subItems: List<SubItem> = emptyList(),
-    //     alarm: Boolean = false,
-    //     calendar: Boolean = false
-    // ) {
-    //     viewModelScope.launch(Dispatchers.IO) {
-    //         telegramSync.sendConfirmation("🔵 insertItem вызван: alarm=$alarm, item.id=${item.id}")
-            
-    //         val finalItem = if (item.id == 0) {
-    //             val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
-    //             item.copy(sort = currentMinSort - 1)
-    //         } else {
-    //             item
-    //         }
-
-    //         // 1. Сохраняем дело и получаем его реальный ID
-    //         val insertedId = db.insertItem(finalItem).toInt()
-            
-    //         // 2. ЕСЛИ ЭТО РЕДАКТИРОВАНИЕ (item.id != 0), чистим старые подзадачи дела в БД
-    //         if (item.id != 0) {
-    //             db.deleteAllSubItemsForTask(item.id)
-    //         }
-
-    //         // 3. Перепривязываем подзадачи к ID дела (для новых дел это будет insertedId)
-    //         val updatedSubItems = subItems.map { subItem ->
-    //             // Важно: обнуляем id самой подзадачи, так как мы пишем их заново как новые строки
-    //             subItem.copy(id = 0, idTask = insertedId)
-    //         }
-
-    //         // 4. Записываем финальный список подзадач из диалога
-    //         db.insertSubItems(updatedSubItems)
-
-    //         withContext(Dispatchers.Main) {
-    //             if (alarm) {
-    //                 val savedItem = finalItem.copy(id = insertedId)
-    //                 permission(NOTIFICATION, savedItem, calendar)
-    //             } else {
-    //                 showDialog = DialogState()
-    //             }
-    //         }
-    //     }
-    // }
 
         fun insertItem(
     item: Item,
@@ -566,19 +523,14 @@ fun openDialogByTaskId(taskId: Int) {
     calendar: Boolean = false
 ) {
     viewModelScope.launch(Dispatchers.IO) {
-        try {
-             telegramSync.sendConfirmation("🔵 insertItem вызван: alarm=$alarm, item.id=${item.id}")
-            
             val finalItem = if (item.id == 0) {
                 val currentMinSort = db.getItemWithMinSort()?.sort ?: 0
                 item.copy(sort = currentMinSort - 1)
             } else {
                 item
             }
-            
-             telegramSync.sendConfirmation("🔵 Перед db.insertItem(), finalItem.sort=${finalItem.sort}")
+
             val insertedId = db.insertItem(finalItem).toInt()
-             telegramSync.sendConfirmation("✅ Заметка создана: id=$insertedId")
             
             if (item.id != 0) {
                 db.deleteAllSubItemsForTask(item.id)
@@ -589,22 +541,16 @@ fun openDialogByTaskId(taskId: Int) {
             }
             
             db.insertSubItems(updatedSubItems)
-             telegramSync.sendConfirmation("✅ Подзадачи сохранены: count=${updatedSubItems.size}")
             
             withContext(Dispatchers.Main) {
                 if (alarm) {
-                     telegramSync.sendConfirmation("🔵 Запускаю permission() с alarm=true")
                     val savedItem = finalItem.copy(id = insertedId)
                     permission(NOTIFICATION, savedItem, calendar)
-                     telegramSync.sendConfirmation("✅ permission() завершён")
                 } else {
                     showDialog = DialogState()
-                     telegramSync.sendConfirmation("✅ Диалог закрыт (alarm=false)")
                 }
             }
-        } catch (e: Exception) {
-             telegramSync.sendConfirmation("❌ ОШИБКА в insertItem: ${e.message}\n${e.stackTraceToString().take(500)}")
-        }
+
     }
 }
 
@@ -658,111 +604,48 @@ fun openDialogByTaskId(taskId: Int) {
         }
     }
 
-    // fun permission(permissionName: String, item: Item? = null,calendar: Boolean = false) {
-    //     viewModelScope.launch{
-    //         val isChekedPermission = permission.isChekedPermission(permissionName)
-
-    //         if (isChekedPermission) {
-
-    //             when (permissionName) {
-    //                 // Для батареи диалоги не нужны — просто уведомляем пользователя, что всё уже работает
-    //                 BATTERY_OPTIMIZATION -> {
-    //                     sendMessage("Разрешение уже выдано")
-    //                 }
-
-    //                 // Для уведомлений и будильников открываем соответствующие диалоги
-    //                 NOTIFICATION -> {
-    //                     showDialog = DialogState(if (calendar) TIME else NOTIFICATION, item)
-    //                 }
-    //                 ALARM_SETTINGS -> {
-    //                     showDialog = DialogState(ALARM_SETTINGS, item)
-    //                 }
-
-    //                 else -> {
-    //                     showDialog = DialogState(DEFAULT_DIALOG, item)
-    //                 }
-    //             }
-    //         }
-    //         else {
-    //             val isGranted = permission.requestPermission(permissionName)
-    //             if (isGranted) {
-    //                 when (permissionName) {
-    //                     APP_SETTINGS -> {  }
-    //                     else -> showDialog = DialogState(permissionName, item)
-    //                 }
-    //             } else {
-    //                 // Если произошла ошибка или отказ
-    //                 when (permissionName) {
-    //                     APP_SETTINGS -> sendMessage("Не удалось открыть настройки")
-    //                     else -> {
-    //                         showDialog = DialogState()
-    //                         sendMessage("Для стабильной работы, необходимо дать разрешение")
-    //                     }
-    //                 }
-    //             }
-
-    //         }
-    //     }
-
-    // }
 
     fun permission(permissionName: String, item: Item? = null, calendar: Boolean = false) {
     viewModelScope.launch {
-        try {
-             telegramSync.sendConfirmation("🔵 permission() вызван: $permissionName")
-            
             val isChekedPermission = permission.isChekedPermission(permissionName)
-             telegramSync.sendConfirmation("🔵 isChekedPermission: $isChekedPermission")
             
             if (isChekedPermission) {
                 when (permissionName) {
                     BATTERY_OPTIMIZATION -> {
                         sendMessage("Разрешение уже выдано")
-                         telegramSync.sendConfirmation("✅ BATTERY_OPTIMIZATION уже выдано")
                     }
                     NOTIFICATION -> {
                         showDialog = DialogState(if (calendar) TIME else NOTIFICATION, item)
-                         telegramSync.sendConfirmation("✅ Открываю диалог: ${if (calendar) "TIME" else "NOTIFICATION"}")
                     }
                     ALARM_SETTINGS -> {
                         showDialog = DialogState(ALARM_SETTINGS, item)
-                         telegramSync.sendConfirmation("✅ Открываю диалог: ALARM_SETTINGS")
                     }
                     else -> {
                         showDialog = DialogState(DEFAULT_DIALOG, item)
-                         telegramSync.sendConfirmation("✅ Открываю диалог: DEFAULT_DIALOG")
                     }
                 }
             } else {
-                 telegramSync.sendConfirmation("🔵 Запрашиваю разрешение: $permissionName")
                 val isGranted = permission.requestPermission(permissionName)
-                 telegramSync.sendConfirmation("🔵 requestPermission вернул: $isGranted")
                 
                 if (isGranted) {
                     when (permissionName) {
                         APP_SETTINGS -> { }
                         else -> {
                             showDialog = DialogState(permissionName, item)
-                             telegramSync.sendConfirmation("✅ Открываю диалог после разрешения: $permissionName")
                         }
                     }
                 } else {
                     when (permissionName) {
                         APP_SETTINGS -> {
                             sendMessage("Не удалось открыть настройки")
-                             telegramSync.sendConfirmation("❌ Не удалось открыть настройки")
                         }
                         else -> {
                             showDialog = DialogState()
                             sendMessage("Для стабильной работы, необходимо дать разрешение")
-                             telegramSync.sendConfirmation("❌ Разрешение не выдано: $permissionName")
                         }
                     }
                 }
             }
-        } catch (e: Exception) {
-             telegramSync.sendConfirmation("❌ ОШИБКА в permission(): ${e.message}")
-        }
     }
 }
 

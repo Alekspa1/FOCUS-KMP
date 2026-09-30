@@ -73,7 +73,7 @@ actual val moduleAnotherPlatform = module {
 
         androidContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager }
 
-    single<AlarmRepository> { AndroidAlarmImpl( get(),get()) }
+    single<AlarmRepository> { AndroidAlarmImpl( get(),get(),get()) }
     single { androidContext().contentResolver }
     single { MultiplatrormAppSettings(get(named("settings"))) }
 

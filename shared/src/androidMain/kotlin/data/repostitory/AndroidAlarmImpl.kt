@@ -3,16 +3,20 @@ package data.repostitory
 import CommonConst.KEY_INTENT
 import CommonConst.KEY_INTENT_ALARM
 import android.app.AlarmManager
+import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import data.alarmReceiwer.AlarmReceiwer
+import data.alarmReceiwer.NotificationBuilder
 import data.room.model.Item
 import domain.repostirory.AlarmRepository
 import kotlin.jvm.java
 
 class AndroidAlarmImpl( private val context: Context,
-                        private val alarmManager: AlarmManager) : AlarmRepository {
+                        private val alarmManager: AlarmManager,
+                        private val notification: NotificationBuilder
+    ) : AlarmRepository {
 
 
     override fun createAlarm(item: Item) {
@@ -27,7 +31,7 @@ class AndroidAlarmImpl( private val context: Context,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }
-
+        notification.alarmPush().cancel(item.id)
         val clockInfo = AlarmManager.AlarmClockInfo(item.alarmTime, alarmtIntent)
         // 2. Устанавливаем ультимативный точный будильник
         alarmManager.setAlarmClock(clockInfo, alarmtIntent)
@@ -56,6 +60,8 @@ class AndroidAlarmImpl( private val context: Context,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }
+        notification.alarmPush().cancel(id)
+        notification.alarmPush().cancel(id*-1)
         alarmManager.cancel(alarmtIntent)
         alarmManager.cancel(alarmtIntentRepeat)
     }
