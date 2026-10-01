@@ -131,6 +131,7 @@ class MainViewModel(
     val sortType = _sortType.asStateFlow()
 
     init {
+
         loadSounds()
         isUpdateApp()
         loadProduct()
@@ -448,7 +449,6 @@ fun openDialogByTaskId(taskId: Int) {
         categoryItemFlow
     ) { itemsList, allSubItems, sort, currentCategory ->
 
-
         val filteredList = itemsList.filter { it.category == currentCategory }
 
         // 2. Сортируем дела
@@ -463,7 +463,6 @@ fun openDialogByTaskId(taskId: Int) {
             filteredList.sortedBy { it.sort }
         }
         val subItemsGrouped = allSubItems.groupBy { it.idTask }
-
         sortedList.map { item ->
             val subItemsForThisTask = subItemsGrouped[item.id] ?: emptyList()
             ItemWithSubItems(
@@ -471,6 +470,7 @@ fun openDialogByTaskId(taskId: Int) {
                 subItems = subItemsForThisTask.sortedBy { it.sort }
             )
         }
+
     }.flowOn(Dispatchers.Default)
         .stateIn(
             scope = viewModelScope,

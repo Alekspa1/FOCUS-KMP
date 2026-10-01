@@ -50,8 +50,8 @@ import org.koin.dsl.bind
 expect val moduleAnotherPlatform: Module
 
 val appModule = module {
-    //viewModelOf(::MainViewModel)
-    singleOf(::MainViewModel)
+    viewModelOf(::MainViewModel)
+   // singleOf(::MainViewModel)
 
     single<myDataBase> {
 

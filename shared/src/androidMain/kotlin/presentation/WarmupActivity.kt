@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import org.koin.android.ext.android.inject
@@ -13,7 +14,6 @@ import kotlin.getValue
 
 class WarmupActivity : AppCompatActivity() {
 
-    private val mainViewModel: MainViewModel by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,8 +27,10 @@ class WarmupActivity : AppCompatActivity() {
         }
 
         setContent {
+            BackHandler(enabled = true) {
+                finish()
+            }
             SplashScreen {
-                mainViewModel.firstStart = false
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                     overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
                 } else {

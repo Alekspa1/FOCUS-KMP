@@ -16,15 +16,16 @@ import android.view.ViewGroup
 import data.repostitory.AndroidPlatformFilePickerImpl
 import data.repostitory.AndroidVoiceIntentImpl
 import kotlinx.coroutines.delay
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class MainActivity : ComponentActivity() {
 
     private val permissionImp: AndroidPermissionImpl by inject()
-    private val mainViewModel: MainViewModel by inject()
+    private val mainViewModel: MainViewModel by viewModel()
     private val filePickerImp: AndroidPlatformFilePickerImpl by inject()
     private val openVoiceImpl : AndroidVoiceIntentImpl by inject()
-
+    private var wasLocked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,21 +34,19 @@ class MainActivity : ComponentActivity() {
         filePickerImp.initLauncher(this@MainActivity)
         openVoiceImpl.initVoice(this@MainActivity)
 
-//        if (savedInstanceState == null) {
-//            val intent = Intent(this@MainActivity, WarmupActivity::class.java).apply {
-//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//            }
-//            this@MainActivity.startActivity(intent)
-//
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-//                this@MainActivity.overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
-//            } else {
-//                @Suppress("DEPRECATION")
-//                this@MainActivity.overridePendingTransition(0, 0)
-//            }
-//        }
+        if (savedInstanceState == null) {
+            val intent = Intent(this@MainActivity, WarmupActivity::class.java)
+            this@MainActivity.startActivity(intent)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                this@MainActivity.overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
+            } else {
+                @Suppress("DEPRECATION")
+                this@MainActivity.overridePendingTransition(0, 0)
+            }
+        }
         setContent {
-            StartApp()
+            StartApp(viewModel = mainViewModel)
         }
 
         handleSharedIntent(intent)
@@ -61,70 +60,36 @@ class MainActivity : ComponentActivity() {
         handleNotificationIntent(intent)
     }
 
-//    private var cameFromStop = false
-//
-//    override fun onStop() {
-//        super.onStop()
-//        if (Build.VERSION.SDK_INT <= 29) {
-//            cameFromStop = true // Фиксируем, что приложение засыпало
-//        }
-//    }
-//
-//    override fun onResume() {
-//        super.onResume()
-//        if (cameFromStop) {
-//            cameFromStop = false
-//
-//            // Даем окну 150-200 мс, чтобы полностью стабилизироваться в Resumed-статусе
-//            // и получить валидный Surface от операционной системы Huawei
-//            window.decorView.postDelayed({
-//                if (!isFinishing && !isDestroyed) {
-//                    this.recreate()
-//                }
-//            }, 400)
-//        }
-//    }
+    override fun onStop() {
+        super.onStop()
+        wasLocked = true
+    }
 
+    override fun onResume() {
+        super.onResume()
 
+        // Делаем сброс только на Android 9–10 (API 28–29), где есть баг с Surface
+        if (wasLocked && Build.VERSION.SDK_INT <= 28) {
+            forceRenderReset()
+            wasLocked = false
+        } else {
+            // На других версиях просто сбрасываем флаг, чтобы не накапливать состояние
+            wasLocked = false
+        }
+    }
 
-//    override fun onRestart() {
-//        super.onRestart()
-//        if (Build.VERSION.SDK_INT <= 29) {
-//            // Микро-изменение размера окна для триггера пересоздания Surface
-//            val params = window.attributes
-//            params.width = params.width - 1
-//            window.attributes = params
-//
-//            window.decorView.postDelayed({
-//                if (!isFinishing && !isDestroyed) {
-//                    val paramsReset = window.attributes
-//                    paramsReset.width = paramsReset.width + 1
-//                    window.attributes = paramsReset
-//                }
-//            }, 100)
-//        }
-//    }
-
-//    override fun onResume() {
-//        super.onResume()
-//        if (Build.VERSION.SDK_INT <= 29) {
-//            // Находим корневой View, в котором живёт Compose
-//            val rootView = window.decorView.findViewById<View>(android.R.id.content)
-//
-//            // Принудительно скрываем и показываем с небольшой задержкой
-//            rootView.visibility = View.INVISIBLE
-//            rootView.postDelayed({
-//                if (!isFinishing && !isDestroyed) {
-//                    rootView.visibility = View.VISIBLE
-//                    // Дополнительно просим перерисовать всё дерево
-//                    rootView.requestLayout()
-//                    rootView.invalidate()
-//                }
-//            }, 100) // 100мс — минимальная задержка, чтобы система успела обработать INVISIBLE
-//        }
-//    }
-
-
+    private fun forceRenderReset() {
+        window.decorView.post {
+            val dialog = Dialog(this, android.R.style.Theme_Translucent_NoTitleBar).apply {
+                setContentView(View(this@MainActivity).apply {
+                    layoutParams = ViewGroup.LayoutParams(0, 0)
+                })
+                window?.setDimAmount(0f)
+            }
+            dialog.show()
+            dialog.window?.decorView?.postDelayed({ dialog.dismiss() }, 100)
+        }
+    }
 
 
     override fun onDestroy() {
@@ -133,6 +98,10 @@ class MainActivity : ComponentActivity() {
         filePickerImp.destroyLauncher()
         openVoiceImpl.destroyVoice()
     }
+
+
+
+
 
 
 
@@ -178,5 +147,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 }
+
+

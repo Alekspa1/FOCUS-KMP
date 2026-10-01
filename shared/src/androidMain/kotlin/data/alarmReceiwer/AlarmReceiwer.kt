@@ -132,7 +132,7 @@ class AlarmReceiwer : BroadcastReceiver(), KoinComponent {
                     } // После перезагрузки
                 }
             } catch (e: Exception) {
-                Log.d("MyLog", "$e -> REBOOT END")
+                println("AlarmReceicer: ${e.message.toString()}")
             } finally {
                 pendingResult.finish()
             }
