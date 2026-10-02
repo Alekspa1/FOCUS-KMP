@@ -25,17 +25,31 @@ import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 
 @Composable
-fun WhatNewDialog(onClose : () -> Unit = {},theme: Theme = ThemeNeon()){
+fun WhatNewDialog(onClose: () -> Unit = {}, theme: Theme = ThemeNeon()) {
 
     AlertDialog(
         onDismissRequest = { onClose() },
         title = { Text("Что нового", color = theme.textColor) },
         text = {
-            Column(modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp)){
-            Text(text = "Повысил точность срабатывания будильников", color = theme.textColor)
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp)
+            ) {
+
+                Text(text = "Исправил глюки с зависанием экрана", color = theme.textColor)
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = theme.textColor.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+
+                Text(
+                    text = "Теперь уведомление нельзя случайно смахнуть (оно исчезнет если дело удалить" +
+                            ", сделать завершенным или перенести дату будильника)",
+                    color = theme.textColor
+                )
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = theme.textColor.copy(alpha = 0.15f),
@@ -50,15 +64,16 @@ fun WhatNewDialog(onClose : () -> Unit = {},theme: Theme = ThemeNeon()){
         confirmButton = {
             TextButton(
                 onClick = {
-                    onClose() },
+                    onClose()
+                },
                 content = { Text("Понятно") })
         }
     )
 }
 
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun Prev(){
+fun Prev() {
     WhatNewDialog()
 }

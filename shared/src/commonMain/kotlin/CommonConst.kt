@@ -1,6 +1,6 @@
 object CommonConst {
 
-    const val CURRENT_VERSION = 37
+    const val CURRENT_VERSION = 38
 
     const val DEFAULT_DIALOG = "DEFAULT_DIALOG"
     const val DELETE_DIALOG_ITEM = "DELETE_DIALOG_ITEM"
