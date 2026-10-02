@@ -3,7 +3,6 @@ import CommonConst.ALARM_SETTINGS
 import CommonConst.APP_SETTINGS
 import CommonConst.BATTERY_OPTIMIZATION
 import CommonConst.NOTIFICATION
-import CommonConst.SOUND
 import android.Manifest
 import android.content.Context
 import android.content.Intent
@@ -12,23 +11,17 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import domain.repostirory.PermissionRepository
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withTimeoutOrNull
-import kotlin.coroutines.resume
-import domain.repostirory.TelegramSyncServiceRepository
 import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 class AndroidPermissionImpl(
     private val context: Context,
-    private val telegramSync : TelegramSyncServiceRepository,
 ):PermissionRepository{
 
     private  var pLauncher: ActivityResultLauncher<String>? = null
@@ -131,23 +124,22 @@ class AndroidPermissionImpl(
     // }
     
  override suspend fun requestPermission(permissionName: String): Boolean {
-        telegramSync.sendConfirmation("🔵 AndroidPermissionImpl.requestPermission: $permissionName")
+
 
         if (isChekedPermission(permissionName)) {
-            telegramSync.sendConfirmation("✅ Разрешение уже есть, возвращаю true")
             return true
         }
 
         if (pLauncher == null) {
-            telegramSync.sendConfirmation("❌ pLauncher == null! Возвращаю false")
+
             return false
         }
 
-        telegramSync.sendConfirmation("🔵 pLauncher инициализирован, продолжаю")
+
 
         when (permissionName) {
             BATTERY_OPTIMIZATION -> {
-                telegramSync.sendConfirmation("🔵 Открываю настройки батареи")
+
                 val intent = getBatteryOptimizationIntent(context).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
@@ -155,19 +147,18 @@ class AndroidPermissionImpl(
                 return true
             }
             APP_SETTINGS -> {
-                telegramSync.sendConfirmation("🔵 Открываю настройки приложения")
+
                 openAppSettingsAndReturn()
                 return true
             }
         }
 
-        telegramSync.sendConfirmation("🔵 Запускаю suspendCancellableCoroutine")
+
 
         return suspendCancellableCoroutine { continuation ->
             
             // 1. Защита от двойного клика: если корутина уже висела, мягко завершаем её с false
             if (activeContinuation?.isActive == true) {
-                telegramSync.sendConfirmation("⚠️ Обнаружен старый запрос, завершаю его с false")
                 activeContinuation?.resume(false)
             }
             
@@ -176,7 +167,6 @@ class AndroidPermissionImpl(
 
             // 3. Настраиваем логику отмены корутины извне (например, уничтожение ViewModel)
             continuation.invokeOnCancellation {
-                telegramSync.sendConfirmation("⚠️ Корутина отменена извне")
                 if(activeContinuation == continuation) {
                     activeContinuation = null
                 }
@@ -186,10 +176,8 @@ class AndroidPermissionImpl(
                 when (permissionName) {
                     NOTIFICATION -> {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            telegramSync.sendConfirmation("🔵 Запускаю launcher для POST_NOTIFICATIONS")
                             pLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
                         } else {
-                            telegramSync.sendConfirmation("🔵 SDK < 33, сразу возвращаю true")
                             activeContinuation = null
                             continuation.resume(true)
                         }
@@ -200,12 +188,10 @@ class AndroidPermissionImpl(
                         } else {
                             Manifest.permission.READ_EXTERNAL_STORAGE
                         }
-                        telegramSync.sendConfirmation("🔵 Запускаю launcher для $permission")
                         pLauncher?.launch(permission)
                     }
                 }
             } catch (e: Exception) {
-                telegramSync.sendConfirmation("❌ ОШИБКА при launch(): ${e.message}")
                 if(activeContinuation == continuation) {
                     activeContinuation = null
                 }
@@ -352,7 +338,6 @@ class AndroidPermissionImpl(
     fun initLauncher(activity: ComponentActivity) {
         pLauncher?.unregister()
         pLauncher = activity.registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            telegramSync.sendConfirmation("🔵 Системный лаунчер вернул результат: isGranted=$isGranted")
             
             // Будим корутину напрямую через сохраненный activeContinuation
             if (activeContinuation?.isActive == true) {
@@ -373,231 +358,3 @@ class AndroidPermissionImpl(
         activeContinuation = null
     }
 }
-
-
-//class AndroidPermissionImpl(private val context: Context):PermissionRepository{
-//
-//    private  var pLauncher: ActivityResultLauncher<String>? = null
-//    private var deferredPermission : CompletableDeferred<Boolean>? = null
-//
-//    override fun isChekedPermission(permissionName: String) : Boolean{
-//
-//   return when(permissionName){
-//    NOTIFICATION->  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//        isPermissionGranted(context, Manifest.permission.POST_NOTIFICATIONS)
-//
-//    } else {
-//        true
-//    }
-//       ALARM_SETTINGS -> {
-//            val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                Manifest.permission.READ_MEDIA_AUDIO
-//            } else {
-//                Manifest.permission.READ_EXTERNAL_STORAGE
-//            }
-//            isPermissionGranted(context, permission)
-//        }
-//       BATTERY_OPTIMIZATION -> {
-//           val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-//           return powerManager.isIgnoringBatteryOptimizations(context.packageName)
-//           }
-//
-//       APP_SETTINGS -> {false }
-//       else -> true
-//    }
-//  }
-//
-//
-//    override suspend fun requestPermission(permissionName: String) : Boolean {
-//        // 1. Твоя родная супер-страховка: если право уже есть, вообще не трогаем лаунчеры
-//        if (isChekedPermission(permissionName)) {
-//            return true
-//        }
-//
-//        if (pLauncher == null) return false
-//
-//        val reservDeferred = CompletableDeferred<Boolean>()
-//        deferredPermission = reservDeferred
-//
-//        when(permissionName) {
-//            NOTIFICATION -> {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                    pLauncher?.launch(Manifest.permission.POST_NOTIFICATIONS)
-//                } else {
-//                    return true
-//                }
-//            }
-//
-//            ALARM_SETTINGS -> {
-//                val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                    Manifest.permission.READ_MEDIA_AUDIO
-//                } else {
-//                    Manifest.permission.READ_EXTERNAL_STORAGE
-//                }
-//                pLauncher?.launch(permission)
-//            }
-//            BATTERY_OPTIMIZATION -> {
-//
-//            val intent = getBatteryOptimizationIntent(context).apply {
-//                // Этот флаг позволяет запускать Activity без ссылки на текущую активити
-//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//            }
-//                context.startActivity(intent)
-//            return true // Сразу возвращаем true, чтобы разблокировать корутину во ViewModel
-//        }
-//
-//            APP_SETTINGS -> {
-//            val manufacturer = android.os.Build.MANUFACTURER.lowercase()
-//            val packageName = context.packageName
-//
-//            fun fallbackIntent(): Intent {
-//                return Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-//                    data = Uri.fromParts("package", packageName, null)
-//                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                }
-//            }
-//
-//            fun tryStart(candidates: List<Intent>): Boolean {
-//                for (intent in candidates) {
-//                    try {
-//                        if (intent.resolveActivity(context.packageManager) != null) {
-//                            context.startActivity(intent)
-//                            return true
-//                        }
-//                    } catch (_: Exception) {
-//                        // пробуем следующий
-//                    }
-//                }
-//                return false
-//            }
-//
-//            val candidates: List<Intent> = when {
-//                manufacturer.contains("huawei") || manufacturer.contains("honor") -> listOf(
-//                    Intent().apply {
-//                        component = android.content.ComponentName(
-//                            "com.huawei.systemmanager",
-//                            "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"
-//                        )
-//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    },
-//                    Intent().apply {
-//                        component = android.content.ComponentName(
-//                            "com.huawei.systemmanager",
-//                            "com.huawei.systemmanager.optimize.process.ProtectActivity"
-//                        )
-//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    }
-//                )
-//
-//                manufacturer.contains("xiaomi") || manufacturer.contains("redmi") || manufacturer.contains("poco") -> listOf(
-//                    Intent().apply {
-//                        component = android.content.ComponentName(
-//                            "com.miui.securitycenter",
-//                            "com.miui.permcenter.autostart.AutoStartManagementActivity"
-//                        )
-//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    }
-//                )
-//
-//                manufacturer.contains("oppo") || manufacturer.contains("realme") -> listOf(
-//                    Intent().apply {
-//                        component = android.content.ComponentName(
-//                            "com.coloros.safecenter",
-//                            "com.coloros.safecenter.startupapp.StartupAppListActivity"
-//                        )
-//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    },
-//                    Intent().apply {
-//                        component = android.content.ComponentName(
-//                            "com.oppo.safe",
-//                            "com.oppo.safe.permission.startup.StartupAppListActivity"
-//                        )
-//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    }
-//                )
-//
-//                manufacturer.contains("vivo") -> listOf(
-//                    Intent().apply {
-//                        component = android.content.ComponentName(
-//                            "com.vivo.permissionmanager",
-//                            "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"
-//                        )
-//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    },
-//                    Intent().apply {
-//                        component = android.content.ComponentName(
-//                            "com.iqoo.secure",
-//                            "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"
-//                        )
-//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    }
-//                )
-//
-//                manufacturer.contains("samsung") -> listOf(
-//                    Intent().apply {
-//                        component = android.content.ComponentName(
-//                            "com.samsung.android.lool",
-//                            "com.samsung.android.sm.ui.battery.BatteryActivity"
-//                        )
-//                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//                    }
-//                )
-//
-//                else -> listOf(fallbackIntent())
-//            }
-//
-//            try {
-//                if (!tryStart(candidates)) {
-//                    context.startActivity(fallbackIntent())
-//                }
-//                true
-//            } catch (e: Exception) {
-//                try {
-//                    context.startActivity(fallbackIntent())
-//                    true
-//                } catch (ex: Exception) {
-//                    false
-//                }
-//            }
-//        }
-//    }
-//
-//        return deferredPermission?.await() ?: false
-//
-//
-//    }
-//
-//
-//    private fun isPermissionGranted(con: Context, p: String): Boolean {
-//        return ContextCompat.checkSelfPermission(con, p) == PackageManager.PERMISSION_GRANTED
-//    }
-//
-//    fun getBatteryOptimizationIntent(context: Context): Intent {
-//        return try {
-//            Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-//                data = Uri.fromParts("package", context.packageName, null)
-//            }
-//        } catch (e: Exception) {
-//            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-//        }
-//    }
-//
-//
-//    fun initLauncher(activit: ComponentActivity){
-//        pLauncher?.unregister()
-//        pLauncher = null
-//        pLauncher = activit.registerForActivityResult(ActivityResultContracts.RequestPermission()) {isGranted->
-//        deferredPermission?.complete(isGranted)
-//        deferredPermission = null
-//        }
-//    }
-//
-//    fun destroyLaunch(){
-//        pLauncher?.unregister()
-//        pLauncher = null
-//        deferredPermission?.apply {
-//            if (isActive) cancel()
-//        }
-//        deferredPermission = null
-//    }
-//}

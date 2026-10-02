@@ -5,7 +5,6 @@ import CommonConst.ONE_MONTH
 import CommonConst.ONE_YEAR
 import CommonConst.SIX_MONTH
 import android.content.Context
-import android.util.Log
 import domain.model.ProductCommon
 import domain.repostirory.PaySdkRepository
 import domain.repostirory.SharedPrefRepository
@@ -16,7 +15,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
 import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
-import kotlin.collections.forEach
 import ru.rustore.sdk.pay.RuStorePayClient
 import ru.rustore.sdk.pay.model.PreferredPurchaseType
 import ru.rustore.sdk.pay.model.Product
@@ -25,10 +23,8 @@ import ru.rustore.sdk.pay.model.ProductPurchaseParams
 import ru.rustore.sdk.pay.model.ProductPurchaseStatus
 import ru.rustore.sdk.pay.model.Purchase
 import ru.rustore.sdk.pay.model.SubscriptionPurchaseStatus
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import ru.rustore.sdk.pay.model.UserAuthorizationStatus
-import android.widget.Toast
+import kotlin.coroutines.resume
 
 
 class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val context: Context) :
@@ -169,6 +165,7 @@ class AndroidPaySdkImpl(private val pref: SharedPrefRepository, private val cont
                 if (hasOldPremium) {
                     return Result.success(true)
                 }
+
                 val isLocalPremiumActive = pref.getPremium()
 
                 // КЕЙС 1: Если в RuStore пусто, а локально премиум включен -> ОТКЛЮЧАЕМ

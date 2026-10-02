@@ -1,28 +1,23 @@
 package data.perository
+
+import domain.model.TelegramResponse
+import domain.repostirory.TelegramSyncServiceRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.request.parameter // нужен для параметров URL
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-
-import domain.model.TelegramResponse
-import domain.model.TelegramUpdate
-import domain.model.TelegramMessage
-import domain.model.TelegramUser
-
-import domain.repostirory.TelegramSyncServiceRepository
-import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceRepository {
 
-    private val BOT_TOKEN = "8748492625:AAElYdrKsBjmgoDqZZyiTQqTkuHibLegR18"
+    private val BOT_TOKEN = "8748492625"
     private val MY_CHAT_ID = 706399730L // Ваш личный ID
     private var lastUpdateId = 0L
     var errorDelay = 5000L

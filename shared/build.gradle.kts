@@ -82,10 +82,13 @@ kotlin {
             implementation("androidx.appcompat:appcompat:1.7.1")
             implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0")
             implementation("com.yandex.android:mobileads:8.3.0")
+
             implementation("ru.rustore.sdk:appupdate:10.1.0")
+
             implementation(project.dependencies.platform("ru.rustore.sdk:bom:2025.11.01"))
             implementation("ru.rustore.sdk:pay")
             implementation("ru.rustore.sdk:billingclient:10.1.0")
+
             implementation("io.ktor:ktor-client-okhttp:3.4.0")
         }
 
