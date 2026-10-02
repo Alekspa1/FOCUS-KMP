@@ -308,7 +308,7 @@ fun MainPager(paddingValues: PaddingValues = PaddingValues(),
                                         change = !item.change,
                                         changeAlarm = false)
                                     viewModel.updateItem(newItem, calendar = false)
-                                    if (item.changeAlarm) {
+                                    if (item.changeAlarm || !item.change) {
                                         viewModel.deleteAlarm(item.id)
                                         viewModel.deleteAlarm(item.id * -1)
                                     }

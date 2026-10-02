@@ -15,16 +15,16 @@ import android.view.View
 import android.view.ViewGroup
 import data.repostitory.AndroidPlatformFilePickerImpl
 import data.repostitory.AndroidVoiceIntentImpl
-
+import kotlinx.coroutines.delay
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
 class MainActivity : ComponentActivity() {
 
     private val permissionImp: AndroidPermissionImpl by inject()
-    private val mainViewModel: MainViewModel by inject()
+    private val mainViewModel: MainViewModel by viewModel()
     private val filePickerImp: AndroidPlatformFilePickerImpl by inject()
     private val openVoiceImpl : AndroidVoiceIntentImpl by inject()
-
     private var wasLocked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,9 +35,7 @@ class MainActivity : ComponentActivity() {
         openVoiceImpl.initVoice(this@MainActivity)
 
         if (savedInstanceState == null) {
-            val intent = Intent(this@MainActivity, WarmupActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
+            val intent = Intent(this@MainActivity, WarmupActivity::class.java)
             this@MainActivity.startActivity(intent)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -48,10 +46,8 @@ class MainActivity : ComponentActivity() {
             }
         }
         setContent {
-            StartApp()
+            StartApp(viewModel = mainViewModel)
         }
-
-
 
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
@@ -73,7 +69,7 @@ class MainActivity : ComponentActivity() {
         super.onResume()
 
         // Делаем сброс только на Android 9–10 (API 28–29), где есть баг с Surface
-        if (wasLocked && Build.VERSION.SDK_INT in 28..29) {
+        if (wasLocked && Build.VERSION.SDK_INT <= 28) {
             forceRenderReset()
             wasLocked = false
         } else {
@@ -81,8 +77,6 @@ class MainActivity : ComponentActivity() {
             wasLocked = false
         }
     }
-
-
 
     private fun forceRenderReset() {
         window.decorView.post {
@@ -107,12 +101,14 @@ class MainActivity : ComponentActivity() {
 
 
 
+
+
+
+
     private fun handleNotificationIntent(intent: Intent?) {
         if (intent == null) return
-
         val taskId = intent.getIntExtra("TASK_ID", -1)
         if (taskId != -1) {
-            // Вызываем новый метод во вьюмодели
             mainViewModel.openDialogByTaskId(taskId)
         }
     }
@@ -125,7 +121,9 @@ class MainActivity : ComponentActivity() {
             type.startsWith("text/") -> {
                 val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (!sharedText.isNullOrBlank()) {
-                    mainViewModel.openDialogWithSharedData(text = sharedText, imageUri = null)
+                    // Защита: очищаем ClipData интента, чтобы KMP-слой не пытался прочитать скрытые медиа-ссылки сайтов
+                    val cleanText = sharedText.trim().replace("\r", "")
+                    mainViewModel.openDialogWithSharedData(text = cleanText, imageUri = null)
                 }
             }
 
@@ -149,5 +147,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 }
+
+

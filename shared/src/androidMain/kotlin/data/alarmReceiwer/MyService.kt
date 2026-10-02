@@ -20,6 +20,7 @@ import domain.repostirory.AlarmRepeadRepository
 import domain.repostirory.AlarmRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -60,9 +61,19 @@ class MyService : Service(), KoinComponent {
         )
 
         serviceScope.launch {
-            val item = getItemFromIntent(intent, KEY_INTENT)
-            if (item.interval != ALARM_REPEAT) processingAlarm(item, "")
-            startNotification(startId, item)
+            try {
+                val item = getItemFromIntent(intent, KEY_INTENT)
+                if (item.interval != ALARM_REPEAT) processingAlarm(item)
+                withContext(Dispatchers.Main) {
+                    notificationBuilder.input(item)
+                }
+            } catch (e: Exception) {
+                println(e.message.toString())
+            } finally {
+                withContext(Dispatchers.Main + NonCancellable) {
+                    stopSelf(startId)
+                }
+            }
         }
 
 
@@ -70,15 +81,14 @@ class MyService : Service(), KoinComponent {
         return START_NOT_STICKY
     }
 
-    private suspend fun processingAlarm(item: Item, value: String) {
+    private suspend fun processingAlarm(item: Item) {
 
         when (item.interval) {
             ALARM_ONE -> {
                 db.updateItem(
                     item.copy(
                         change = false,
-                        changeAlarm = false,
-                        name = "${item.name} $value".trim()
+                        changeAlarm = false
                     )
                 )
             }
@@ -92,12 +102,13 @@ class MyService : Service(), KoinComponent {
     }
 
 
-    private suspend fun startNotification(startId: Int, item: Item) {
-        withContext(Dispatchers.Main) {
-            notificationBuilder.input(item)
-            stopSelf(startId)
-        }
-    }
+    // private suspend fun startNotification(startId: Int, item: Item) {
+    //     withContext(Dispatchers.Main) {
+    //         notificationBuilder.input(item)
+    //         stopForeground(STOP_FOREGROUND_REMOVE)
+    //         stopSelf(startId)
+    //     }
+    // }
 
 
     private suspend fun getItemFromIntent(intent: Intent, key: String): Item {

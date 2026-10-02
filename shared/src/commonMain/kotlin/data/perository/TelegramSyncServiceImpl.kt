@@ -14,6 +14,11 @@ import domain.model.TelegramUser
 
 import domain.repostirory.TelegramSyncServiceRepository
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
 
 class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceRepository {
 
@@ -21,6 +26,10 @@ class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceReposit
     private val MY_CHAT_ID = 706399730L // Ваш личный ID
     private var lastUpdateId = 0L
     var errorDelay = 5000L
+
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    
   override  fun  listenToTelegramRealtime(): Flow<String> = flow {
         while (true) {
             try {
@@ -67,17 +76,33 @@ class TelegramSyncServiceImpl(val ktor: HttpClient) : TelegramSyncServiceReposit
         }
     }
 
-    private suspend fun sendConfirmation(taskText: String) {
+ override  fun sendConfirmation(message: String) {
+    scope.launch(Dispatchers.IO) {
         try {
             val url = "https://api.telegram.org/bot$BOT_TOKEN/sendMessage"
-            ktor.get(url) {
-                url {
-                    parameters.append("chat_id", MY_CHAT_ID.toString())
-                    parameters.append("text", "✅ Задача успешно добавлена на устройство:\n\"$taskText\"")
-                }
-            }
+            // ktor.get(url) { убрал отправку лога
+            //     url {
+            //         parameters.append("chat_id", MY_CHAT_ID.toString())
+            //         parameters.append("text", message)
+            //     }
+            // }
         } catch (e: Exception) {
-            e.printStackTrace()
+            // Игнорируем ошибки отправки, чтоб не сломать основную логику
         }
     }
+}
+
+    // private suspend fun sendConfirmation(taskText: String) {
+    //     try {
+    //         val url = "https://api.telegram.org/bot$BOT_TOKEN/sendMessage"
+    //         ktor.get(url) {
+    //             url {
+    //                 parameters.append("chat_id", MY_CHAT_ID.toString())
+    //                 parameters.append("text", "✅ Задача успешно добавлена на устройство:\n\"$taskText\"")
+    //             }
+    //         }
+    //     } catch (e: Exception) {
+    //         e.printStackTrace()
+    //     }
+    // }
 }

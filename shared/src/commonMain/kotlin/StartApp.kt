@@ -116,7 +116,8 @@ import presentation.theme.ThemeVolcanic
 import kotlin.time.Clock
 
 @Composable
-fun StartApp(viewModel: MainViewModel = koinViewModel()) {
+fun StartApp(androidViewModel: MainViewModel? = null,
+             viewModel: MainViewModel = androidViewModel ?: koinViewModel()) {
 
 
     val theme = viewModel.themeState

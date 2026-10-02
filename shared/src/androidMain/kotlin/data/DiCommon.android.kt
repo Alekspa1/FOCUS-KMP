@@ -67,13 +67,13 @@ actual val moduleAnotherPlatform = module {
     }
 
 
-    single { AndroidPermissionImpl(get()) } bind PermissionRepository::class
+    single { AndroidPermissionImpl(get(),get() ) } bind PermissionRepository::class
 
     single<AlarmManager> {
 
         androidContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager }
 
-    single<AlarmRepository> { AndroidAlarmImpl( get(),get()) }
+    single<AlarmRepository> { AndroidAlarmImpl( get(),get(),get()) }
     single { androidContext().contentResolver }
     single { MultiplatrormAppSettings(get(named("settings"))) }
 
