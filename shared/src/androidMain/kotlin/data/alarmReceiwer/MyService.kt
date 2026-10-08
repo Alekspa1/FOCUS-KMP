@@ -94,7 +94,7 @@ class MyService : Service(), KoinComponent {
             }
 
             else -> {
-                alarmRepeat.alarmRepead(item.id)
+                alarmRepeat.alarmRepead(item.id,true)
             }
         }
 
