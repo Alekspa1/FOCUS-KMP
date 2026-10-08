@@ -19,7 +19,7 @@ class AlarmRepeadImp(
     private val alarm: AlarmRepository
 ) : AlarmRepeadRepository {
 
-    override suspend fun alarmRepead(id: Int,sendMessage : (String) -> Unit) {
+    override suspend fun alarmRepead(id: Int,repeat: Boolean = false,sendMessage : (String) -> Unit) {
         val item = db.getItemFromId(id)
         val currentMillis: Long = kotlin.time.Clock.System.now().toEpochMilliseconds()
 
@@ -36,7 +36,7 @@ class AlarmRepeadImp(
                     alarmTime = nextAlarmTime
                 )
 
-                alarm.createAlarm(newItem)
+                alarm.createAlarm(newItem,repeat)
                 db.updateItem(newItem)
 
 
@@ -51,7 +51,7 @@ class AlarmRepeadImp(
                     changeAlarm = true,
                     alarmTime = nextAlarmTime
                 )
-                alarm.createAlarm(newItem)
+                alarm.createAlarm(newItem,repeat)
                 db.updateItem(newItem)
             }
 
@@ -63,7 +63,7 @@ class AlarmRepeadImp(
 
                 val newItem =
                     item.copy(changeAlarm = true, alarmTime = nextAlarmTime)
-                alarm.createAlarm(newItem)
+                alarm.createAlarm(newItem,repeat)
                 db.updateItem(newItem)
             }
 
