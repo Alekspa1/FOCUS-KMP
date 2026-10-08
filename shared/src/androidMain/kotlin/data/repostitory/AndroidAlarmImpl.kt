@@ -19,7 +19,7 @@ class AndroidAlarmImpl( private val context: Context,
     ) : AlarmRepository {
 
 
-    override fun createAlarm(item: Item, repeat: Boolean = false) {
+    override fun createAlarm(item: Item, repeat: Boolean) {
 
         val alarmtIntent = Intent(context, AlarmReceiwer::class.java).let { intent ->
             intent.putExtra(KEY_INTENT, item.id)
