@@ -31,7 +31,7 @@ class AndroidAlarmImpl( private val context: Context,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }
-        notification.alarmPush().cancel(item.id)
+       // notification.alarmPush().cancel(item.id)
         val clockInfo = AlarmManager.AlarmClockInfo(item.alarmTime, alarmtIntent)
         // 2. Устанавливаем ультимативный точный будильник
         alarmManager.setAlarmClock(clockInfo, alarmtIntent)
