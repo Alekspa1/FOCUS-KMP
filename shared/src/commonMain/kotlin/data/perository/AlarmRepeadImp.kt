@@ -19,7 +19,7 @@ class AlarmRepeadImp(
     private val alarm: AlarmRepository
 ) : AlarmRepeadRepository {
 
-    override suspend fun alarmRepead(id: Int,repeat: Boolean = false,sendMessage : (String) -> Unit) {
+    override suspend fun alarmRepead(id: Int,repeat: Boolean,sendMessage : (String) -> Unit) {
         val item = db.getItemFromId(id)
         val currentMillis: Long = kotlin.time.Clock.System.now().toEpochMilliseconds()
 
