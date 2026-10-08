@@ -695,7 +695,7 @@ fun openDialogByTaskId(taskId: Int) {
                             updateItem(item = item.copy(changeAlarm = false))
                         } else {
                            // insertAlarm(item)
-                           alarm.createAlarm(ite,true) 
+                           alarm.createAlarm(item,true) 
                         }
 
                     }
