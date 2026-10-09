@@ -8,11 +8,14 @@ import data.repostitory.AndroidPermissionImpl
 import org.koin.android.ext.android.inject
 import MainViewModel
 import android.app.Dialog
+import android.app.KeyguardManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import data.repostitory.AndroidPlatformFilePickerImpl
 import data.repostitory.AndroidVoiceIntentImpl
 import kotlinx.coroutines.delay
@@ -48,7 +51,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             StartApp(viewModel = mainViewModel)
         }
-
+        turnScreenOnAndShowWhenLocked()
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
     }
@@ -89,6 +92,26 @@ class MainActivity : ComponentActivity() {
             dialog.show()
             dialog.window?.decorView?.postDelayed({ dialog.dismiss() }, 100)
         }
+    }
+
+    private fun turnScreenOnAndShowWhenLocked() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            // Для Android 8.1 (API 27) и новее (включая Android 10 у Gora)
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        } else {
+            // Для старых версий Android (API 26 и ниже)
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                        WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON // Чтобы экран не тух, пока звонит
+            )
+        }
+
+        // Разблокируем экран (убирает белый/черный экран блокировки со свайпом)
+        val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
+        keyguardManager.requestDismissKeyguard(this, null)
     }
 
 
