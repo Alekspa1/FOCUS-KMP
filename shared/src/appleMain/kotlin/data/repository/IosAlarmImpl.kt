@@ -21,7 +21,7 @@ class IosAlarmImpl : AlarmRepository {
 
     private val notificationCenter = UNUserNotificationCenter.currentNotificationCenter()
 
-    override fun createAlarm(item: Item) {
+    override fun createAlarm(item: Item, repeat: Boolean) {
         // 1. Создаем контент напоминания
         val content = UNMutableNotificationContent().apply {
             setTitle("FOCUS")

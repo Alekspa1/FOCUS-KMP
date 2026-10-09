@@ -24,7 +24,7 @@ class DesktopAlarmImpl(
     private val activeAlarms = ConcurrentHashMap<Int, ScheduledFuture<*>>()
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    override fun createAlarm(item: Item) {
+    override fun createAlarm(item: Item, repeat: Boolean) {
         // ОСТАВЛЯЕМ СТРОКУ! Она жизненно необходима для очистки памяти Java
         deleteAlarm(item.id)
 
