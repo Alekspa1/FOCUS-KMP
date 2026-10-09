@@ -11,6 +11,11 @@ import data.alarmReceiwer.AlarmReceiwer
 import data.alarmReceiwer.NotificationBuilder
 import data.room.model.Item
 import domain.repostirory.AlarmRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.jvm.java
 
 class AndroidAlarmImpl( private val context: Context,
@@ -31,7 +36,7 @@ class AndroidAlarmImpl( private val context: Context,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }
-        if(!repeat)notification.alarmPush().cancel(item.id)
+        if(!repeat)  notification.alarmPush().cancel(item.id)
         
         val clockInfo = AlarmManager.AlarmClockInfo(item.alarmTime, alarmtIntent)
         // 2. Устанавливаем ультимативный точный будильник

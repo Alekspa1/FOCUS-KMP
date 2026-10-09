@@ -73,7 +73,7 @@ class AlarmRepeadImp(
                     nextAlarmTime = addOneYearOrMonth(nextAlarmTime,ALARM_YEAR )
                 }
                 val newItem = item.copy(changeAlarm = true, alarmTime = nextAlarmTime)
-                alarm.createAlarm(newItem)
+                alarm.createAlarm(newItem,repeat)
                 db.updateItem(newItem)
             }
         }

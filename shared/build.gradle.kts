@@ -117,8 +117,8 @@ android {
         applicationId = "com.exampl3.flashlight"
         minSdk = 26
         targetSdk = 36
-        versionCode = 38
-        versionName = "11.2"
+        versionCode = 39
+        versionName = "11.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -138,6 +138,17 @@ android {
 //            )
 //        }
 //    }  это чтобы сжимать apk
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
 }
 
 

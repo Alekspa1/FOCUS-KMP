@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import presentation.theme.Theme
 import presentation.theme.ThemeNeon
 
@@ -27,10 +28,16 @@ fun WhatNewDialog(onClose: () -> Unit = {}, theme: Theme = ThemeNeon()) {
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
-                    .padding(horizontal = 10.dp)
+                    //.padding(horizontal = 10.dp)
             ) {
 
-                Text(text = "Исправил глюки с зависанием экрана", color = theme.textColor)
+                Text(text = "Уменьшил вес приложения", color = theme.textColor)
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = theme.textColor.copy(alpha = 0.15f),
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+                Text(text = "*Если после этого будут какие то глюки то пожалуйста воспользуйтесь обратной связью", color = theme.textColor)
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = theme.textColor.copy(alpha = 0.15f),
