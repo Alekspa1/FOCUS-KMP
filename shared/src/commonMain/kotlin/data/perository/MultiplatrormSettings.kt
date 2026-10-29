@@ -1,8 +1,10 @@
 package data.perository
 
 import CommonConst.KEY_NOTE_BOOK
+import CommonConst.KEY_STATE_IS_SERVICE
 import CommonConst.PLATFORM_DESKTOP
 import CommonConst.PREMIUM_KEY
+import CommonConst.STATE_IS_SERVICE_TURN_OFF
 import androidx.compose.runtime.traceEventEnd
 import androidx.compose.runtime.traceEventStart
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -38,11 +40,17 @@ class MultiplatrormSettings(private val settings: Settings, private val platform
     override fun saveTextNoteBook(value: String) {
         settings.putString(KEY_NOTE_BOOK, value)
 
-        
-
     }
 
     override fun loadTextNoteBook(): String = settings.getString(KEY_NOTE_BOOK, greetings)
+
+
+    override fun saveStateService(value: String) {
+        settings.putString(KEY_STATE_IS_SERVICE, value)
+
+    }
+
+    override fun loadStateService(): String = settings.getString(KEY_STATE_IS_SERVICE, STATE_IS_SERVICE_TURN_OFF)
 
     override fun savePremium(flag: Boolean) {
         settings.putBoolean(PREMIUM_KEY, flag)

@@ -45,12 +45,22 @@ class NotificationBuilder(
 
 
     fun createInitialStubNotification(): Notification {
+        val deleteIntent = Intent(context, MyService::class.java).apply {
+            action = "com.example.app.ACTION_RECREATE_NOTIFICATION"
+        }
+        val deletePendingIntent = PendingIntent.getService(
+            context,
+            100, // Уникальный requestCode
+            deleteIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         return NotificationCompat.Builder(context, Int.MAX_VALUE.toString())
             .setSmallIcon(R.drawable.icon)
             .setContentTitle("Служба будильников")
-            .setContentText("Уведомления активны")
+            .setContentText("Фоновая активнось запущена")
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setDeleteIntent(deletePendingIntent)
             .build()
     }
 
@@ -60,14 +70,18 @@ class NotificationBuilder(
 
     }
 
+    fun createChanelStub(){
+        if(notificationManager.getNotificationChannel(Int.MAX_VALUE.toString()) == null){
+            notificationManager.createNotificationChannel(createCnanellStub())
+        }
+    }
+
     fun alarmPush(): NotificationManager {
         if (notificationManager.getNotificationChannel(CHANNEL_ID) != null) {
             notificationManager.deleteNotificationChannel(CHANNEL_ID)
         }
 
-        if(notificationManager.getNotificationChannel(Int.MAX_VALUE.toString()) == null){
-           notificationManager.createNotificationChannel(createCnanellStub())
-        }
+
 
         if (newRingtoneUri != oldRingtoneUri) {
 

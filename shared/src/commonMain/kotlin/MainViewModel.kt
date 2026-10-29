@@ -115,6 +115,9 @@ class MainViewModel(
     private val _isPersonalToDoRoute = MutableStateFlow(true)
     val route = _isPersonalToDoRoute.asStateFlow()
 
+    private val _isActiveService = MutableStateFlow(pref.loadStateService())
+    val isActiveService = _isActiveService.asStateFlow()
+
     private var _toast = MutableSharedFlow<String>()
     var toast = _toast.asSharedFlow()
 
@@ -362,6 +365,13 @@ fun openDialogByTaskId(taskId: Int) {
         settingsPref.saveSort(sort)
         _sortType.value = sort
     }
+
+    fun saveStateService(stateService: String) {
+        pref.saveStateService(stateService)
+        _isActiveService.value = stateService
+
+    }
+    fun loadStateService() = pref.loadStateService()
 
      fun saveSize(size: String) {
         settingsPref.saveSize(size)

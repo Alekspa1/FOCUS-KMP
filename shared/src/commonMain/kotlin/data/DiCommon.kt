@@ -51,7 +51,7 @@ expect val moduleAnotherPlatform: Module
 
 val appModule = module {
     viewModelOf(::MainViewModel)
-   // singleOf(::MainViewModel)
+
 
     single<myDataBase> {
 

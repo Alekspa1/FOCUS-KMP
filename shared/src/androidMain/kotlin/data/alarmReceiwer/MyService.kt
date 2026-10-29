@@ -9,10 +9,14 @@ import CommonConst.KEY_INTENT_CALL_POSTPONE
 import CommonConst.REBOOT
 import CommonConst.TEN_MINUTES
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
+import android.util.Log
 import android.widget.Toast
 import data.room.CourseDao
 import data.room.model.Item
@@ -23,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -46,82 +51,57 @@ class MyService : Service(), KoinComponent {
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private lateinit var calendarZero: Calendar
 
+    private var isServiceRunning = false
+    private var wakeLock: PowerManager.WakeLock? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        calendarZero = Calendar.getInstance()
-        if (intent == null) {
-            stopSelf(startId)
+        if (intent?.action == "com.example.app.ACTION_STOP_SERVICE") {
+            isServiceRunning = false
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            // Важно: отпускаем процессор при выключении
+            if (wakeLock?.isHeld == true) wakeLock?.release()
+
+            stopSelf()
             return START_NOT_STICKY
         }
 
-        notificationBuilder.alarmPush()
-        startForeground(
-            Int.MAX_VALUE,
-            notificationBuilder.createInitialStubNotification()
-        )
+        if (intent?.action == "com.example.app.ACTION_RECREATE_NOTIFICATION") {
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            // Перерисовываем уведомление с тем же ID
+            notificationManager.notify(Int.MAX_VALUE, notificationBuilder.createInitialStubNotification())
+            return START_STICKY
+        }
 
-        serviceScope.launch {
-            try {
-                val item = getItemFromIntent(intent, KEY_INTENT)
-                if (item.interval != ALARM_REPEAT) processingAlarm(item)
-                withContext(Dispatchers.Main) {
-                    notificationBuilder.input(item)
+        if (!isServiceRunning) {
+            notificationBuilder.createChanelStub()
+            startForeground(Int.MAX_VALUE, notificationBuilder.createInitialStubNotification())
+            isServiceRunning = true
+
+            // ВКЛЮЧАЕМ ЖЕЛЕЗНУЮ БОДРСТВЕННОСТЬ ПРОЦЕССОРА
+            val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyService::WakeLockTag").apply {
+                acquire(Long.MAX_VALUE) // Процессор больше не уснет
+            }
+            var count = 0
+            var way = true
+            serviceScope.launch {
+                while (isActive) {
+                    delay(60000L)
+                    if(way) count++ else count--
+                   if (count == 10) way = false
+                   if (count == 0) way = true
+                    Log.d("MyLog", count.toString())
                 }
-            } catch (e: Exception) {
-                println(e.message.toString())
-            } finally {
-                withContext(Dispatchers.Main + NonCancellable) {
-                    stopSelf(startId)
-                }
             }
         }
-
-
-
-        return START_NOT_STICKY
-    }
-
-    private suspend fun processingAlarm(item: Item) {
-
-        when (item.interval) {
-            ALARM_ONE -> {
-                db.updateItem(
-                    item.copy(
-                        change = false,
-                        changeAlarm = false
-                    )
-                )
-            }
-
-            else -> {
-                alarmRepeat.alarmRepead(item.id,true)
-            }
-        }
-
-
-    }
-
-
-    // private suspend fun startNotification(startId: Int, item: Item) {
-    //     withContext(Dispatchers.Main) {
-    //         notificationBuilder.input(item)
-    //         stopForeground(STOP_FOREGROUND_REMOVE)
-    //         stopSelf(startId)
-    //     }
-    // }
-
-
-    private suspend fun getItemFromIntent(intent: Intent, key: String): Item {
-        val rawId = intent.getIntExtra(key, 0)
-        return if (rawId > 0) {
-            db.getItemFromId(rawId)
-        } else {
-            db.getItemFromId(rawId * -1).copy(interval = ALARM_REPEAT)
-        }
+        return START_STICKY
     }
 
     override fun onDestroy() {
+        serviceJob.cancel()
+        // На всякий случай освобождаем замок и тут
+        if (wakeLock?.isHeld == true) wakeLock?.release()
+        isServiceRunning = false
         super.onDestroy()
-        serviceJob.cancel() // Отменяем корутины, если сервис принудительно завершен
     }
 }

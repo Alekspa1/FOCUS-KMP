@@ -9,4 +9,8 @@ interface SharedPrefRepository {
     fun getPremium(): Boolean
 
     fun savePremium(flag: Boolean)
+
+    fun saveStateService(value: String)
+
+    fun loadStateService() : String
 }

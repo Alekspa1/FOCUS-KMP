@@ -23,6 +23,10 @@ object CommonConst {
 
 
     const val NOTEBOOK = "NOTEBOOK"
+    const val KEY_STATE_IS_SERVICE = "KEY_STATE_IS_SERVICE"
+    const val STATE_IS_SERVICE_TURN_ON = "Включена"
+    const val STATE_IS_SERVICE_TURN_OFF = "Выключена"
+    const val SERVICE_SETTINGS = "SERVICE_SETTINGS"
     const val TODO = "TODO"
 
     const val FIRST_NAVIGATION_MAIN_SCREEN = "FIRST_NAVIGATION_MAIN_SCREEN"

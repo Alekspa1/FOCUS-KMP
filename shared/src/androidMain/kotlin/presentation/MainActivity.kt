@@ -1,5 +1,6 @@
 package presentation
 
+import CommonConst.STATE_IS_SERVICE_TURN_ON
 import StartApp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,9 +17,18 @@ import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import data.alarmReceiwer.MyService
 import data.repostitory.AndroidPlatformFilePickerImpl
 import data.repostitory.AndroidVoiceIntentImpl
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.Dispatcher
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -54,6 +64,28 @@ class MainActivity : ComponentActivity() {
         turnScreenOnAndShowWhenLocked()
         handleSharedIntent(intent)
         handleNotificationIntent(intent)
+
+        lifecycleScope.launch {
+            mainViewModel.isActiveService
+                .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+                .collect { state ->
+                    if (state == STATE_IS_SERVICE_TURN_ON) {
+                        val startIntent = Intent(this@MainActivity, MyService::class.java).apply {
+                            action = "com.example.app.ACTION_START_SERVICE"
+                        }
+                        // Для СТАРТА — строго startForegroundService
+                        ContextCompat.startForegroundService(this@MainActivity, startIntent)
+                    } else {
+                        val stopIntent = Intent(this@MainActivity, MyService::class.java).apply {
+                            action = "com.example.app.ACTION_STOP_SERVICE"
+                        }
+                        // ДЛЯ ОСТАНОВКИ: передаем экшен через ОБЫЧНЫЙ startService.
+                        // Он не требует обязательного вызова startForeground() и не роняет приложение!
+                        this@MainActivity.startService(stopIntent)
+                    }
+                }
+        }
+
     }
 
 

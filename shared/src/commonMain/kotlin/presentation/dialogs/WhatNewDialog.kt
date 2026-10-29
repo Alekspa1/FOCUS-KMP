@@ -28,16 +28,11 @@ fun WhatNewDialog(onClose: () -> Unit = {}, theme: Theme = ThemeNeon()) {
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .fillMaxWidth()
-                    //.padding(horizontal = 10.dp)
             ) {
 
-                Text(text = "Уменьшил вес приложения", color = theme.textColor)
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = theme.textColor.copy(alpha = 0.15f),
-                    modifier = Modifier.padding(top = 6.dp)
-                )
-                Text(text = "*Если после этого будут какие то глюки то пожалуйста воспользуйтесь обратной связью", color = theme.textColor)
+                Text(text = "Добавил в настройки запуск фоноой " +
+                        "активности (Рекомендуется включать, только " +
+                        "если система жестко глушит стандартные уведомления)", color = theme.textColor)
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = theme.textColor.copy(alpha = 0.15f),

@@ -6,6 +6,7 @@ import CommonConst.BATTERY_OPTIMIZATION
 import CommonConst.DONATE
 import CommonConst.FIRST_NAVIGATION_FAQ_SCREEN
 import CommonConst.PLATFORM_ANDROID
+import CommonConst.SERVICE_SETTINGS
 import CommonConst.SIZE_LARGE
 import CommonConst.SIZE_SETTINGS
 import CommonConst.SIZE_SMALL
@@ -13,14 +14,16 @@ import CommonConst.SIZE_STANDART
 import CommonConst.SORT_SETTINGS
 import CommonConst.SORT_STANDART
 import CommonConst.SORT_USER
+import CommonConst.STATE_IS_SERVICE_TURN_OFF
+import CommonConst.STATE_IS_SERVICE_TURN_ON
 import CommonConst.THEME_FUTURE
-import CommonConst.THEME_SETTINGS
-import CommonConst.THEME_ZABOR
-import CommonConst.THEME_MRAMOR
 import CommonConst.THEME_GROZA
-import CommonConst.THEME_POISON
+import CommonConst.THEME_MRAMOR
 import CommonConst.THEME_PLATINA
+import CommonConst.THEME_POISON
+import CommonConst.THEME_SETTINGS
 import CommonConst.THEME_VULCAN
+import CommonConst.THEME_ZABOR
 import MainViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -85,13 +88,20 @@ fun SettingsScreen(
     innerPadding: PaddingValues
 ) {
 
-    val listTheme = listOf(THEME_FUTURE, THEME_ZABOR,THEME_MRAMOR,THEME_GROZA,THEME_POISON,THEME_PLATINA,THEME_VULCAN)
+    val listTheme = listOf(
+        THEME_FUTURE,
+        THEME_ZABOR,
+        THEME_MRAMOR,
+        THEME_GROZA,
+        THEME_POISON,
+        THEME_PLATINA,
+        THEME_VULCAN
+    )
     val listSize = listOf(SIZE_SMALL, SIZE_STANDART, SIZE_LARGE)
     val listSort = listOf(SORT_STANDART, SORT_USER)
+    val listState = listOf(STATE_IS_SERVICE_TURN_ON, STATE_IS_SERVICE_TURN_OFF)
     val listSound by viewModel.soundState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-
-
 
 
     val isLoading by viewModel.isBackupLoading.collectAsStateWithLifecycle()
@@ -168,152 +178,141 @@ fun SettingsScreen(
                 onCancel = { viewModel.showDialog = DialogState() }
             )
         }
+
+        SERVICE_SETTINGS -> {
+            SettingsDialog(
+                title = "Внимание! Эта настройка принудительно будит процессор каждую минуту для проверки будильников." +
+                        " Рекомендуется включать, только если система жестко глушит стандартные уведомления.",
+                select = viewModel.loadStateService(),
+                listAction = listState,
+                onClick = { action ->
+                    viewModel.saveStateService(action)
+                    viewModel.showDialog = DialogState()
+                },
+                onCancel = { viewModel.showDialog = DialogState() })
+        }
     }
 
 
-        Box(modifier = Modifier.fillMaxSize()) { 
-        Image( 
-            painter = painterResource(theme.backgroundStart), 
-            contentDescription = null, 
-            modifier = Modifier.fillMaxSize(), 
-            contentScale = ContentScale.FillBounds 
-        ) 
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(theme.backgroundStart),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
+        )
 
-            Column(
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+
+        ) {
+            Box(
                 modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, bottom = 10.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp, bottom = 10.dp)
+                IconButton(
+                    onClick = { onBack() },
+                    modifier = Modifier.size(35.dp)
                 ) {
-                    IconButton(
-                        onClick = { onBack() },
-                        modifier = Modifier.size(35.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Или ваша иконка ic_menu
-                            contentDescription = "Меню",
-                            tint = theme.iconTint
-                        )
-                    }
-
-
-                    Text(
-                        text = "Общие настройки", // tv_settings
-                        color = theme.textColor,
-                        fontSize = size.textMenu,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Или ваша иконка ic_menu
+                        contentDescription = "Меню",
+                        tint = theme.iconTint
                     )
                 }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 10.dp),
-                    verticalArrangement = Arrangement.spacedBy(5.dp) // layout_marginBottom="3dp"
+
+                Text(
+                    text = "Общие настройки", // tv_settings
+                    color = theme.textColor,
+                    fontSize = size.textMenu,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp) // layout_marginBottom="3dp"
+            ) {
+                // --- СЕКЦИЯ 1: СТИЛИ И ИНСТРУКЦИИ ---
+                SettingItem(
+                    "Тема",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { viewModel.showDialog = DialogState(THEME_SETTINGS) }
+                SettingItem(
+                    "Размер шрифта",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { viewModel.showDialog = DialogState(SIZE_SETTINGS) }
+                SettingItem(
+                    "Сортировка",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem,
+                    true
                 ) {
-                    // --- СЕКЦИЯ 1: СТИЛИ И ИНСТРУКЦИИ ---
+                    if (viewModel.premiumState.value) viewModel.showDialog =
+                        DialogState(SORT_SETTINGS)
+                    else viewModel.sendMessage("Доступно в PREMIUM версии")
+
+                }
+                if (viewModel.getPlatform == PLATFORM_ANDROID) {
                     SettingItem(
-                        "Тема",
-                        theme,
-                        size,
-                        theme.cardMenuItem,
-                        theme.borderCardMenuItem
-                    ) { viewModel.showDialog = DialogState("THEME_SETTINGS") }
-                    SettingItem(
-                        "Размер шрифта",
-                        theme,
-                        size,
-                        theme.cardMenuItem,
-                        theme.borderCardMenuItem
-                    ) { viewModel.showDialog = DialogState("SIZE_SETTINGS") }
-                    SettingItem(
-                        "Сортировка",
+                        "Звук будильника",
                         theme,
                         size,
                         theme.cardMenuItem,
                         theme.borderCardMenuItem,
                         true
                     ) {
-                        if(viewModel.premiumState.value) viewModel.showDialog = DialogState(SORT_SETTINGS)
+                        if (viewModel.premiumState.value) viewModel.permission(ALARM_SETTINGS)
                         else viewModel.sendMessage("Доступно в PREMIUM версии")
 
+
                     }
-                    if (viewModel.getPlatform == PLATFORM_ANDROID) {
-                        SettingItem(
-                            "Звук будильника",
-                            theme,
-                            size,
-                            theme.cardMenuItem,
-                            theme.borderCardMenuItem,
-                            true
-                        ) {
-                            if(viewModel.premiumState.value) viewModel.permission(ALARM_SETTINGS)
-                            else viewModel.sendMessage("Доступно в PREMIUM версии")
+                }
 
 
-                        }
-                    }
+                SettingItem(
+                    "Инструкция",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { onClick(FIRST_NAVIGATION_FAQ_SCREEN) }
+                SettingItem(
+                    "Обратная связь",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { uriHandler.openUri("mailto:apereverzev47@gmail.com?subject=FOCUS") }
+                SettingItem(
+                    "Поддержать разработчика",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) { uriHandler.openUri(DONATE) }
 
-
-                    SettingItem(
-                        "Инструкция",
-                        theme,
-                        size,
-                        theme.cardMenuItem,
-                        theme.borderCardMenuItem
-                    ) { onClick(FIRST_NAVIGATION_FAQ_SCREEN) }
-                    SettingItem(
-                        "Обратная связь",
-                        theme,
-                        size,
-                        theme.cardMenuItem,
-                        theme.borderCardMenuItem
-                    ) { uriHandler.openUri("mailto:apereverzev47@gmail.com?subject=FOCUS") }
-                    SettingItem(
-                        "Поддержать разработчика",
-                        theme,
-                        size,
-                        theme.cardMenuItem,
-                        theme.borderCardMenuItem
-                    ) { uriHandler.openUri(DONATE) }
-
-                    if (viewModel.getPlatform == PLATFORM_ANDROID) {
-                        // --- СЕКЦИЯ 2: РАЗРЕШЕНИЯ (tv_settings_permissions) ---
-                        Text(
-                            text = "Разрешения",
-                            color = theme.textColor,
-                            fontSize = size.textMenu,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
-                            textAlign = TextAlign.Center
-                        )
-                        SettingItem(
-                            "Работа в фоне",
-                            theme,
-                            size,
-                            theme.cardMenuItem,
-                            theme.borderCardMenuItem
-                        ) { viewModel.permission(BATTERY_OPTIMIZATION) }
-                        SettingItem(
-                            "Настройки приложения",
-                            theme,
-                            size,
-                            theme.cardMenuItem,
-                            theme.borderCardMenuItem
-                        ) { viewModel.permission(APP_SETTINGS) }
-                    }
-
-                    // --- СЕКЦИЯ 3: РЕЗЕРВНОЕ КОПИРОВАНИЕ (tv_settings_backup) ---
+                if (viewModel.getPlatform == PLATFORM_ANDROID) {
+                    // --- СЕКЦИЯ 2: РАЗРЕШЕНИЯ (tv_settings_permissions) ---
                     Text(
-                        text = "Резервное копирование",
+                        text = "Разрешения",
                         color = theme.textColor,
                         fontSize = size.textMenu,
                         fontWeight = FontWeight.Bold,
@@ -321,42 +320,72 @@ fun SettingsScreen(
                         textAlign = TextAlign.Center
                     )
                     SettingItem(
-                        "Сохранить базу данных",
+                        "Работа в фоне",
                         theme,
                         size,
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
-                    ) {
-                viewModel.doExport()
-                    }
+                    ) { viewModel.permission(BATTERY_OPTIMIZATION) }
                     SettingItem(
-                        "Загрузить базу данных",
+                        "Настройки приложения",
                         theme,
                         size,
                         theme.cardMenuItem,
                         theme.borderCardMenuItem
-                    ) {
-                       viewModel.doImport()
-                    }
+                    ) { viewModel.permission(APP_SETTINGS) }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    SettingItem(
+                        "Фоновая служба уведомлений",
+                        theme,
+                        size,
+                        theme.cardMenuItem,
+                        theme.borderCardMenuItem
+                    ) { viewModel.showDialog = DialogState(SERVICE_SETTINGS) }
                 }
+
+                // --- СЕКЦИЯ 3: РЕЗЕРВНОЕ КОПИРОВАНИЕ (tv_settings_backup) ---
+                Text(
+                    text = "Резервное копирование",
+                    color = theme.textColor,
+                    fontSize = size.textMenu,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp),
+                    textAlign = TextAlign.Center
+                )
+                SettingItem(
+                    "Сохранить базу данных",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) {
+                    viewModel.doExport()
+                }
+                SettingItem(
+                    "Загрузить базу данных",
+                    theme,
+                    size,
+                    theme.cardMenuItem,
+                    theme.borderCardMenuItem
+                ) {
+                    viewModel.doImport()
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
+    }
 
-            // 3. СЛОЙ ИНДИКАТОРА ЗАГРУЗКИ: progressBar2 (Заменяет ProgressBar из XML)
-            // Предполагаем, что во ViewModel есть переменная isLoadingState (Boolean)
-            // if (viewModel.updateState) { // Или твой флаг загрузки
-            //     CircularProgressIndicator(
-            //         modifier = Modifier
-            //             .size(48.dp)
-            //             .align(Alignment.Center),
-            //         color = theme.textColor
-            //     )
-            // }
-
-
-
+    // 3. СЛОЙ ИНДИКАТОРА ЗАГРУЗКИ: progressBar2 (Заменяет ProgressBar из XML)
+    // Предполагаем, что во ViewModel есть переменная isLoadingState (Boolean)
+    // if (viewModel.updateState) { // Или твой флаг загрузки
+    //     CircularProgressIndicator(
+    //         modifier = Modifier
+    //             .size(48.dp)
+    //             .align(Alignment.Center),
+    //         color = theme.textColor
+    //     )
+    // }
 
 
 }
@@ -381,8 +410,10 @@ fun SettingItem(
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(containerColor = cardColor)
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically){
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
                 text = text,
                 color = theme.textColor,
@@ -390,14 +421,13 @@ fun SettingItem(
                 lineHeight = size.lineHeightItem,
                 modifier = Modifier.weight(1f) // padding="8dp"
             )
-            if(iconPremium) {
+            if (iconPremium) {
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = "Меню",
                     tint = theme.tintPremiumOn
                 )
             }
-
 
 
         }
